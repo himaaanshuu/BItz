@@ -1,0 +1,13 @@
+{
+  "name": "bitez",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix bitz-frontend run dev",
+    "build": "npm --prefix bitz-frontend run build",
+    "preview": "npm --prefix bitz-frontend run preview",
+    "lint": "npm --prefix bitz-frontend run lint"
+  },
+  "dependencies": {
+    "lucide-react": "^0.562.0"
+  }
+}
