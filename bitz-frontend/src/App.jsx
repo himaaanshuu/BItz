@@ -21,6 +21,7 @@ import OrderPage from './pages/OrderPage';
 import Profile from './pages/Profile';
 import OrderHistory from './pages/OrderHistory';
 import CurrentOrder from './pages/CurrentOrder';
+import TrackOrder from './pages/TrackOrder';
 
 function App() {
   const [canteens, setCanteens] = useState([
@@ -90,16 +91,21 @@ function App() {
 
   // 🔒 Student Protected Route - Also checks admin not logged in
   const ProtectedStudentRoute = ({ children }) => {
-    const studentToken = localStorage.getItem('bitezToken');
-    const adminToken = localStorage.getItem('bitezAdminToken');
+    const authToken = localStorage.getItem('bitezAuthToken');
+    const hasStudentCookie = document.cookie
+      .split(';')
+      .some((cookie) => cookie.trim().startsWith('bitezAuth=student'));
+    const hasAdminCookie = document.cookie
+      .split(';')
+      .some((cookie) => cookie.trim().startsWith('bitezAuth=admin'));
     
     // If admin is logged in, redirect to admin dashboard
-    if (adminToken && adminToken.startsWith('admin_')) {
+    if (hasAdminCookie) {
       return <Navigate to="/admin-dashboard" />;
     }
     
     // If student not logged in, redirect to student login
-    if (!studentToken || !studentToken.startsWith('student_')) {
+    if (!authToken || !hasStudentCookie) {
       return <Navigate to="/student-login" />;
     }
     
@@ -108,16 +114,21 @@ function App() {
 
   // 🔒 Admin Protected Route - Also checks student not logged in
   const ProtectedAdminRoute = ({ children }) => {
-    const studentToken = localStorage.getItem('bitezToken');
-    const adminToken = localStorage.getItem('bitezAdminToken');
+    const authToken = localStorage.getItem('bitezAuthToken');
+    const hasStudentCookie = document.cookie
+      .split(';')
+      .some((cookie) => cookie.trim().startsWith('bitezAuth=student'));
+    const hasAdminCookie = document.cookie
+      .split(';')
+      .some((cookie) => cookie.trim().startsWith('bitezAuth=admin'));
     
     // If student is logged in, redirect to student dashboard
-    if (studentToken && studentToken.startsWith('student_')) {
+    if (hasStudentCookie) {
       return <Navigate to="/student-dashboard" />;
     }
     
     // If admin not logged in, redirect to admin login
-    if (!adminToken || !adminToken.startsWith('admin_')) {
+    if (!authToken || !hasAdminCookie) {
       return <Navigate to="/admin-login" />;
     }
     
@@ -179,6 +190,15 @@ function App() {
                 <CurrentOrder />
               </ProtectedStudentRoute>
             } 
+          />
+
+          <Route
+            path="/track"
+            element={
+              <ProtectedStudentRoute>
+                <TrackOrder />
+              </ProtectedStudentRoute>
+            }
           />
 
           {/* Admin Routes */}

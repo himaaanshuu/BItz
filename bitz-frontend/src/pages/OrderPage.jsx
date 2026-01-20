@@ -13,8 +13,8 @@ const OrderPage = () => {
 
   useEffect(() => {
     // Load user data
-    const userData = localStorage.getItem('bitezUser') || sessionStorage.getItem('bitezUser');
-    const token = localStorage.getItem('bitezToken') || sessionStorage.getItem('bitezToken');
+  const userData = localStorage.getItem('bitezUser') || sessionStorage.getItem('bitezUser');
+  const token = localStorage.getItem('bitezAuthToken');
     const hasAuthCookie = document.cookie
       .split(';')
       .some((cookie) => cookie.trim().startsWith('bitezAuth=student'));

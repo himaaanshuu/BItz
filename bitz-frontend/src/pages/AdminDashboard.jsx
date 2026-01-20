@@ -12,9 +12,28 @@ import {
   Settings,
   BarChart2
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../services/api';
 
 const CanteenDashboard = () => {
   const [canteenData, setCanteenData] = useState(null);
+  const [canteenForm, setCanteenForm] = useState({
+    name: '',
+    location: '',
+    timings: '',
+    contactPhone: '',
+    contactEmail: '',
+  });
+  const [menuDraft, setMenuDraft] = useState({
+    name: '',
+    price: '',
+    category: '',
+    available: true,
+  });
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [showAccountMenu, setShowAccountMenu] = useState(false);
 
@@ -28,8 +47,37 @@ const CanteenDashboard = () => {
   });
 
   useEffect(() => {
-    const storedData = localStorage.getItem('bitezAdmin');
-    if (storedData) setCanteenData(JSON.parse(storedData));
+    const loadCanteen = async () => {
+      try {
+        const storedAdmin = localStorage.getItem('bitezAdmin');
+        if (!storedAdmin || !localStorage.getItem('bitezAuthToken')) {
+          navigate('/admin-login');
+          return;
+        }
+
+        const response = await api.getCanteen();
+        const canteen = response.canteen || {
+          name: '',
+          location: '',
+          timings: '',
+          contactPhone: '',
+          contactEmail: '',
+          menuItems: [],
+        };
+        setCanteenData(canteen);
+        setCanteenForm({
+          name: canteen.name,
+          location: canteen.location,
+          timings: canteen.timings,
+          contactPhone: canteen.contactPhone,
+          contactEmail: canteen.contactEmail,
+        });
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    loadCanteen();
 
     const mockOrders = [
       {
@@ -85,7 +133,7 @@ const CanteenDashboard = () => {
       }
     ];
 
-    setOrders(mockOrders);
+  setOrders(mockOrders);
 
     const pending = mockOrders.filter(o => o.status === 'pending').length;
     const preparing = mockOrders.filter(o => o.status === 'preparing').length;
@@ -101,7 +149,75 @@ const CanteenDashboard = () => {
       todayRevenue: revenue,
       totalOrders: mockOrders.length
     });
-  }, []);
+  }, [navigate]);
+
+  const handleCanteenChange = (field, value) => {
+    setCanteenForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveCanteen = async () => {
+    setMessage('');
+    setError('');
+    setIsSaving(true);
+    try {
+      const response = canteenData
+        ? await api.updateCanteen(canteenForm)
+        : await api.createCanteen(canteenForm);
+      setCanteenData(response.canteen);
+      setMessage('Canteen details saved successfully.');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleMenuDraft = (field, value) => {
+    setMenuDraft((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleAddMenuItem = async () => {
+    setMessage('');
+    setError('');
+    setIsSaving(true);
+    try {
+      const response = await api.addMenuItem({
+        ...menuDraft,
+        price: Number(menuDraft.price),
+      });
+      setCanteenData(response.canteen);
+      setMenuDraft({ name: '', price: '', category: '', available: true });
+      setMessage('Menu item added.');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleToggleAvailability = async (item) => {
+    setMessage('');
+    setError('');
+    try {
+      const response = await api.updateMenuItem(item._id, {
+        available: !item.available,
+      });
+      setCanteenData(response.canteen);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleDeleteMenuItem = async (itemId) => {
+    setMessage('');
+    setError('');
+    try {
+      const response = await api.deleteMenuItem(itemId);
+      setCanteenData(response.canteen);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   const updateOrderStatus = (orderId, newStatus) => {
     const updatedOrders = orders.map(order =>
@@ -135,14 +251,18 @@ const CanteenDashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('bitezAdmin');
-    localStorage.removeItem('bitezAdminToken');
+    localStorage.removeItem('bitezAuthToken');
+    document.cookie = 'bitezAuth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     window.location.href = '/';
   };
 
   if (!canteenData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-orange-100">
-        <Store size={64} className="text-orange-600" />
+        <div className="text-center">
+          <Store size={64} className="text-orange-600 mx-auto" />
+          <p className="mt-4 text-gray-700">Loading canteen profile...</p>
+        </div>
       </div>
     );
   }
@@ -202,6 +322,138 @@ const CanteenDashboard = () => {
 
       {/* DASHBOARD CONTENT */}
       <div className="max-w-7xl mx-auto p-6">
+        {(message || error) && (
+          <div className="mb-6">
+            {message && (
+              <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
+                {message}
+              </div>
+            )}
+            {error && (
+              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                {error}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="grid lg:grid-cols-3 gap-6 mb-10">
+          <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-xl border">
+            <h2 className="text-2xl font-black mb-4">Canteen Profile</h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              <input
+                className="px-4 py-3 border rounded-xl"
+                placeholder="Canteen Name"
+                value={canteenForm.name}
+                onChange={(e) => handleCanteenChange('name', e.target.value)}
+              />
+              <input
+                className="px-4 py-3 border rounded-xl"
+                placeholder="Location"
+                value={canteenForm.location}
+                onChange={(e) => handleCanteenChange('location', e.target.value)}
+              />
+              <input
+                className="px-4 py-3 border rounded-xl"
+                placeholder="Timings"
+                value={canteenForm.timings}
+                onChange={(e) => handleCanteenChange('timings', e.target.value)}
+              />
+              <input
+                className="px-4 py-3 border rounded-xl"
+                placeholder="Contact Phone"
+                value={canteenForm.contactPhone}
+                onChange={(e) => handleCanteenChange('contactPhone', e.target.value)}
+              />
+              <input
+                className="px-4 py-3 border rounded-xl md:col-span-2"
+                placeholder="Contact Email"
+                value={canteenForm.contactEmail}
+                onChange={(e) => handleCanteenChange('contactEmail', e.target.value)}
+              />
+            </div>
+            <button
+              onClick={handleSaveCanteen}
+              disabled={isSaving}
+              className="mt-4 bg-orange-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-700 disabled:opacity-70"
+            >
+              {isSaving ? 'Saving...' : 'Save Profile'}
+            </button>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-xl border">
+            <h2 className="text-2xl font-black mb-4">Add Menu Item</h2>
+            <div className="space-y-3">
+              <input
+                className="w-full px-4 py-3 border rounded-xl"
+                placeholder="Item Name"
+                value={menuDraft.name}
+                onChange={(e) => handleMenuDraft('name', e.target.value)}
+              />
+              <input
+                className="w-full px-4 py-3 border rounded-xl"
+                placeholder="Category"
+                value={menuDraft.category}
+                onChange={(e) => handleMenuDraft('category', e.target.value)}
+              />
+              <input
+                type="number"
+                className="w-full px-4 py-3 border rounded-xl"
+                placeholder="Price"
+                value={menuDraft.price}
+                onChange={(e) => handleMenuDraft('price', e.target.value)}
+              />
+              <label className="flex items-center gap-2 text-sm text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={menuDraft.available}
+                  onChange={(e) => handleMenuDraft('available', e.target.checked)}
+                />
+                Available
+              </label>
+              <button
+                onClick={handleAddMenuItem}
+                disabled={isSaving}
+                className="w-full bg-gray-900 text-white py-3 rounded-xl font-bold hover:bg-black disabled:opacity-70"
+              >
+                Add Item
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-6 shadow-xl border mb-10">
+          <h2 className="text-2xl font-black mb-4">Menu Items</h2>
+          {canteenData.menuItems?.length ? (
+            <div className="space-y-4">
+              {canteenData.menuItems.map((item) => (
+                <div key={item._id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border rounded-xl p-4">
+                  <div>
+                    <p className="font-bold text-lg">{item.name}</p>
+                    <p className="text-sm text-gray-600">{item.category} · ₹{item.price}</p>
+                    <p className="text-xs text-gray-500">{item.available ? 'Available' : 'Unavailable'}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleToggleAvailability(item)}
+                      className="px-4 py-2 rounded-lg border text-sm font-semibold"
+                    >
+                      {item.available ? 'Mark Unavailable' : 'Mark Available'}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteMenuItem(item._id)}
+                      className="px-4 py-2 rounded-lg border text-sm font-semibold text-red-600 border-red-200 hover:bg-red-50"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-600">No menu items yet. Add your first item.</p>
+          )}
+        </div>
         {/* Stats */}
         <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
           {[

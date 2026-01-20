@@ -1,99 +1,85 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, ChevronRight, Eye, EyeOff } from 'lucide-react';
+import { Store, ChevronRight, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import { api } from '../services/api';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
-  const [isSignup, setIsSignup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [otpRequested, setOtpRequested] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [otpCountdown, setOtpCountdown] = useState(0);
+  const [otpPreview, setOtpPreview] = useState('');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [canteenName, setCanteenName] = useState('');
   const [phone, setPhone] = useState('');
-  const [location, setLocation] = useState('');
 
-  // Demo canteens
-  const existingCanteens = [
-    {
-      id: 'main_canteen',
-      email: 'main@canteen.com',
-      password: 'main123',
-      canteenName: 'Main Canteen',
-      location: 'Ground Floor, Building A',
-      phone: '+91 98765 43210'
-    },
-    {
-      id: 'south_canteen',
-      email: 'south@canteen.com',
-      password: 'south123',
-      canteenName: 'South Canteen',
-      location: '2nd Floor, Building B',
-      phone: '+91 98765 43211'
-    }
-  ];
-
-  // Quick Login
-  const handleQuickLogin = (canteen) => {
-    localStorage.removeItem('bitezToken');
-    localStorage.removeItem('bitezStudent');
-
-    localStorage.setItem(
-      'bitezAdmin',
-      JSON.stringify({
-        id: canteen.id,
-        email: canteen.email,
-        canteenName: canteen.canteenName,
-        phone: canteen.phone,
-        location: canteen.location,
-        isNewCanteen: false
-      })
-    );
-
-    localStorage.setItem('bitezAdminToken', 'admin_' + Date.now());
-    navigate('/admin-dashboard');
+  const resetStatus = () => {
+    setMessage('');
+    setError('');
   };
 
-  const handleManualLogin = () => {
-    const canteen = existingCanteens.find(
-      c => c.email === email && c.password === password
-    );
+  const startOtpTimer = () => {
+    setOtpCountdown(60);
+  };
 
-    if (!canteen) {
-      alert('❌ Invalid credentials');
+  const handleRequestOtp = async () => {
+    resetStatus();
+    if (!email || !phone) {
+      setError('Email and phone are required.');
       return;
     }
 
-    handleQuickLogin(canteen);
+    setIsLoading(true);
+    try {
+      const response = await api.requestAdminOtp({ email, phone });
+      setMessage(response.message || 'OTP sent to email and phone.');
+      setOtpRequested(true);
+      if (response.otp) {
+        setOtpPreview(`Dev OTP: ${response.otp}`);
+      }
+      startOtpTimer();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // ✅ SIGNUP (Create Account)
-  const handleSignup = () => {
-    if (!email || !password || !canteenName || !phone || !location) {
-      alert('⚠️ Please fill all fields!');
+  const handleLogin = async () => {
+    resetStatus();
+    setOtpPreview('');
+    if (!email || !password || !otp) {
+      setError('Email, password, and OTP are required.');
       return;
     }
 
-    localStorage.removeItem('bitezToken');
-    localStorage.removeItem('bitezStudent');
-
-    localStorage.setItem(
-      'bitezAdmin',
-      JSON.stringify({
-        id: 'canteen_' + Date.now(),
-        email,
-        canteenName,
-        phone,
-        location,
-        isNewCanteen: true
-      })
-    );
-
-    localStorage.setItem('bitezAdminToken', 'admin_' + Date.now());
-    alert('✅ Account created successfully!');
-    navigate('/admin-dashboard');
+    setIsLoading(true);
+    try {
+      const data = await api.loginAdmin({ email, password, otp });
+      localStorage.setItem('bitezAuthToken', data.token);
+      localStorage.setItem('bitezAdmin', JSON.stringify(data.user));
+      document.cookie = 'bitezAuth=admin; path=/; max-age=86400';
+      navigate('/admin-dashboard');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  React.useEffect(() => {
+    if (otpCountdown <= 0) return;
+    const timer = setInterval(() => {
+      setOtpCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [otpCountdown]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-100 to-red-100">
@@ -104,40 +90,41 @@ const AdminLogin = () => {
 
           <div className="text-center mb-8">
             <Store className="mx-auto mb-4 text-orange-600" size={64} />
-            <h2 className="text-4xl font-black">
-              {isSignup ? 'Register Canteen' : 'Canteen Admin Login'}
-            </h2>
+            <h2 className="text-4xl font-black">Canteen Admin Login</h2>
           </div>
 
           <div className="space-y-4">
-
-            {isSignup && (
-              <>
-                <input
-                  placeholder="Canteen Name"
-                  value={canteenName}
-                  onChange={e => setCanteenName(e.target.value)}
-                  className="w-full px-4 py-3 border-2 rounded-xl"
-                />
-                <input
-                  placeholder="Location"
-                  value={location}
-                  onChange={e => setLocation(e.target.value)}
-                  className="w-full px-4 py-3 border-2 rounded-xl"
-                />
-                <input
-                  placeholder="Phone"
-                  value={phone}
-                  onChange={e => setPhone(e.target.value)}
-                  className="w-full px-4 py-3 border-2 rounded-xl"
-                />
-              </>
+            {message && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+                {message}
+              </div>
             )}
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                {error}
+              </div>
+            )}
+            {otpPreview && (
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700">
+                {otpPreview}
+              </div>
+            )}
+
+            <div className="p-3 bg-orange-50 border border-orange-200 rounded-xl text-sm text-orange-700">
+              Admin accounts are created by the system administrator. Please login using your assigned credentials.
+            </div>
 
             <input
               placeholder="Email"
               value={email}
               onChange={e => setEmail(e.target.value)}
+              className="w-full px-4 py-3 border-2 rounded-xl"
+            />
+
+            <input
+              placeholder="Phone Number"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
               className="w-full px-4 py-3 border-2 rounded-xl"
             />
 
@@ -158,42 +145,47 @@ const AdminLogin = () => {
               </button>
             </div>
 
-            <button
-              onClick={isSignup ? handleSignup : handleManualLogin}
-              className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-xl font-bold"
-            >
-              {isSignup ? 'Create Account' : 'Login'} <ChevronRight className="inline" />
-            </button>
-          </div>
+            {otpRequested && (
+              <input
+                placeholder="Enter OTP"
+                value={otp}
+                onChange={e => setOtp(e.target.value)}
+                className="w-full px-4 py-3 border-2 rounded-xl"
+              />
+            )}
 
-          {/* 🔁 TOGGLE LOGIN / SIGNUP */}
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => setIsSignup(!isSignup)}
-              className="text-orange-600 font-semibold hover:underline"
-            >
-              {isSignup
-                ? 'Already have an account? Login'
-                : "Don't have a canteen account? Create one"}
-            </button>
-          </div>
-
-          {/* Quick Login */}
-          {!isSignup && (
-            <div className="mt-6 p-4 bg-orange-50 rounded-xl">
-              <p className="text-center font-bold mb-3">🔐 Quick Login</p>
-              {existingCanteens.map(c => (
+            {!otpRequested ? (
+              <button
+                onClick={handleRequestOtp}
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-xl font-bold disabled:opacity-70"
+              >
+                {isLoading ? 'Sending OTP...' : 'Send OTP'} <ShieldCheck className="inline" />
+              </button>
+            ) : (
+              <>
                 <button
-                  key={c.id}
-                  onClick={() => handleQuickLogin(c)}
-                  className="w-full p-3 mb-2 bg-white rounded-lg border hover:border-orange-500"
+                  onClick={handleLogin}
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-xl font-bold disabled:opacity-70"
                 >
-                  <p className="font-bold">{c.canteenName}</p>
-                  <p className="text-xs">{c.email}</p>
+                  {isLoading ? 'Logging in...' : 'Verify & Login'} <ChevronRight className="inline" />
                 </button>
-              ))}
-            </div>
-          )}
+                <button
+                  type="button"
+                  onClick={handleRequestOtp}
+                  disabled={isLoading || otpCountdown > 0}
+                  className="w-full text-orange-600 font-semibold py-2 hover:underline disabled:opacity-60"
+                >
+                  {otpCountdown > 0 ? `Resend OTP in ${otpCountdown}s` : 'Resend OTP'}
+                </button>
+              </>
+            )}
+          </div>
+
+          <div className="mt-6 text-center text-sm text-gray-600">
+            OTP is required for admin login. If you need access, contact the system administrator.
+          </div>
 
         </div>
       </div>

@@ -1,22 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const StudentDashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Try to load from sessionStorage (used in artifact demo)
-    let userData = sessionStorage.getItem('bitezUser');
-    let token = sessionStorage.getItem('bitezToken');
+    let userData = localStorage.getItem('bitezUser');
+    const token = localStorage.getItem('bitezAuthToken');
+    const hasAuthCookie = document.cookie
+      .split(';')
+      .some((cookie) => cookie.trim().startsWith('bitezAuth=student'));
     
-    // Fallback to localStorage (for your real app)
-    if (!userData || !token) {
-      userData = localStorage.getItem('bitezUser');
-      token = localStorage.getItem('bitezToken');
-    }
-    
-    if (!userData || !token) {
+    if (!userData || !token || !hasAuthCookie) {
       alert('No user data found. Please login first.');
       setLoading(false);
       return;
@@ -40,12 +38,12 @@ const StudentDashboard = () => {
   }, []);
 
   const handleLogout = () => {
-    sessionStorage.removeItem('bitezToken');
-    sessionStorage.removeItem('bitezUser');
-    localStorage.removeItem('bitezToken');
+    localStorage.removeItem('bitezAuthToken');
     localStorage.removeItem('bitezUser');
+    document.cookie = 'bitezAuth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     alert('Logged out successfully!');
     setUser(null);
+    navigate('/student-login');
   };
 
   if (loading) {
@@ -92,19 +90,28 @@ const StudentDashboard = () => {
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-red-600 to-orange-600 p-6 rounded-2xl hover:scale-105 transition transform shadow-xl cursor-pointer">
+          <div
+            onClick={() => navigate('/order')}
+            className="bg-gradient-to-br from-red-600 to-orange-600 p-6 rounded-2xl hover:scale-105 transition transform shadow-xl cursor-pointer"
+          >
             <div className="text-5xl mb-3">🍕</div>
             <h3 className="text-xl font-bold mb-2">Order Food</h3>
             <p className="text-red-100 text-sm">Browse menu & place orders</p>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-orange-500 p-6 rounded-2xl hover:scale-105 transition transform shadow-xl cursor-pointer">
+          <div
+            onClick={() => navigate('/track')}
+            className="bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-orange-500 p-6 rounded-2xl hover:scale-105 transition transform shadow-xl cursor-pointer"
+          >
             <div className="text-5xl mb-3">📦</div>
             <h3 className="text-xl font-bold mb-2">Track Orders</h3>
             <p className="text-gray-400 text-sm">Check your order status</p>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-orange-500 p-6 rounded-2xl hover:scale-105 transition transform shadow-xl cursor-pointer">
+          <div
+            onClick={() => navigate('/profile')}
+            className="bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-orange-500 p-6 rounded-2xl hover:scale-105 transition transform shadow-xl cursor-pointer"
+          >
             <div className="text-5xl mb-3">👤</div>
             <h3 className="text-xl font-bold mb-2">My Profile</h3>
             <p className="text-gray-400 text-sm">View & edit your details</p>
@@ -164,7 +171,10 @@ const StudentDashboard = () => {
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🍽️</div>
               <p className="text-gray-400 text-lg mb-4">No orders yet!</p>
-              <span className="inline-block bg-gradient-to-r from-red-600 to-orange-600 text-white px-8 py-3 rounded-lg font-bold hover:from-red-700 hover:to-orange-700 transition cursor-pointer">
+              <span
+                onClick={() => navigate('/order')}
+                className="inline-block bg-gradient-to-r from-red-600 to-orange-600 text-white px-8 py-3 rounded-lg font-bold hover:from-red-700 hover:to-orange-700 transition cursor-pointer"
+              >
                 Order Now
               </span>
             </div>

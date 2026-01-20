@@ -1,91 +1,120 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Eye, EyeOff, ChevronRight } from 'lucide-react';
+import { User, Eye, EyeOff, ChevronRight, ShieldCheck } from 'lucide-react';
+import { api } from '../services/api';
 
 const StudentLogin = () => {
   const navigate = useNavigate();
   const [isSignup, setIsSignup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [otpRequested, setOtpRequested] = useState(false);
+  const [otpCountdown, setOtpCountdown] = useState(0);
+  const [otpPreview, setOtpPreview] = useState('');
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
-  const [studentId, setStudentId] = useState('');
+  const [otp, setOtp] = useState('');
 
-  const handleSubmit = () => {
-    console.log('Button clicked!', { isSignup, email, password, name });
-    setMessage('Button clicked! Processing...');
+  const resetStatus = () => {
+    setMessage('');
+    setError('');
+  };
 
-    if (isSignup) {
-      // Signup validation
-      if (!name || !email || !password) {
-        const msg = '⚠️ Please fill all required fields (Name, Email, Password)';
-        alert(msg);
-        setMessage(msg);
-        return;
-      }
+  const startOtpTimer = () => {
+    setOtpCountdown(60);
+  };
 
-      const userData = {
-        name,
-        email,
-        phone: phone || '+91 9876543210',
-        studentId: studentId || 'STU' + Math.floor(Math.random() * 10000)
-      };
+  const handleSignup = async () => {
+    resetStatus();
+    if (!name || !email || !password || !phone) {
+      setError('Please fill in name, email, phone, and password.');
+      return;
+    }
 
-      try {
-        sessionStorage.setItem('bitezToken', 'student_' + Date.now());
-        sessionStorage.setItem('bitezUser', JSON.stringify(userData));
-        const msg = '✅ Account created successfully! Data stored in sessionStorage.';
-        alert(msg);
-        setMessage(msg);
-      } catch (error) {
-        const msg = '❌ Error: ' + error.message;
-        alert(msg);
-        setMessage(msg);
-      }
-    } else {
-      // Login validation
-      if (!email || !password) {
-        const msg = '⚠️ Please enter email and password';
-        alert(msg);
-        setMessage(msg);
-        return;
-      }
-
-      const userData = {
-        name: name || 'Student User',
-        email,
-        phone: phone || '+91 9876543210',
-        studentId: studentId || 'STU' + Math.floor(Math.random() * 10000)
-      };
-
-      try {
-        const token = 'student_' + Date.now();
-        localStorage.setItem('bitezToken', token);
-        localStorage.setItem('bitezUser', JSON.stringify(userData));
-        sessionStorage.setItem('bitezToken', token);
-        sessionStorage.setItem('bitezUser', JSON.stringify(userData));
-        document.cookie = 'bitezAuth=student; path=/; max-age=86400';
-        const msg = '✅ Login successful! Data stored in localStorage.';
-        alert(msg);
-        setMessage(msg);
-        navigate('/order');
-      } catch (error) {
-        const msg = '❌ Error: ' + error.message;
-        alert(msg);
-        setMessage(msg);
-      }
+    setIsLoading(true);
+    try {
+      await api.registerStudent({ name, email, password, phone });
+      setMessage('Account created. Please request OTP to login.');
+      setIsSignup(false);
+      setOtpRequested(false);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const handleRequestOtp = async () => {
+    resetStatus();
+    if (!email || !phone) {
+      setError('Please enter your email and phone number.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await api.requestStudentOtp({ email, phone });
+      setMessage(response.message || 'OTP sent. Please check your email and phone.');
+      setOtpRequested(true);
+      if (response.otp) {
+        setOtpPreview(`Dev OTP: ${response.otp}`);
+      }
+      startOtpTimer();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogin = async () => {
+    resetStatus();
+    setOtpPreview('');
+    if (!email || !password || !otp) {
+      setError('Email, password, and OTP are required.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const data = await api.loginStudent({ email, password, otp });
+      localStorage.setItem('bitezAuthToken', data.token);
+      localStorage.setItem('bitezUser', JSON.stringify(data.user));
+      document.cookie = 'bitezAuth=student; path=/; max-age=86400';
+      setMessage('Login successful. Redirecting...');
+      navigate('/order');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (otpCountdown <= 0) return;
+    const timer = setInterval(() => {
+      setOtpCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [otpCountdown]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-100 to-red-100">
       {/* Navbar */}
       <nav className="bg-white shadow-md p-4">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-2xl font-bold text-orange-600">BITEZ</h1>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="text-2xl font-bold text-orange-600 hover:text-orange-500"
+          >
+            BITEZ
+          </button>
         </div>
       </nav>
 
@@ -107,8 +136,18 @@ const StudentLogin = () => {
 
           {/* Message Display */}
           {message && (
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
               {message}
+            </div>
+          )}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              {error}
+            </div>
+          )}
+          {otpPreview && (
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700">
+              {otpPreview}
             </div>
           )}
 
@@ -125,16 +164,9 @@ const StudentLogin = () => {
                 />
                 <input
                   type="tel"
-                  placeholder="Phone Number (Optional)"
+                  placeholder="Phone Number *"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none"
-                />
-                <input
-                  type="text"
-                  placeholder="Student ID (Optional)"
-                  value={studentId}
-                  onChange={(e) => setStudentId(e.target.value)}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none"
                 />
               </>
@@ -147,6 +179,16 @@ const StudentLogin = () => {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none"
             />
+
+            {!isSignup && (
+              <input
+                type="tel"
+                placeholder="Phone Number *"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none"
+              />
+            )}
 
             <div className="relative">
               <input
@@ -165,20 +207,55 @@ const StudentLogin = () => {
             </div>
 
             <div className="space-y-2">
-              <span
-                onMouseDown={handleSubmit}
-                className="block w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-700 hover:to-red-700 transition-all text-center cursor-pointer select-none active:scale-95"
-              >
-                {isSignup ? 'Create Account' : 'Login'} <ChevronRight className="inline" size={20} />
-              </span>
-              
-              {/* Debug button */}
-              <span
-                onMouseDown={() => alert('Test button works!')}
-                className="block w-full bg-gray-600 text-white py-2 rounded-lg text-sm text-center cursor-pointer select-none"
-              >
-                Test Click (Debug)
-              </span>
+              {isSignup ? (
+                <button
+                  type="button"
+                  onClick={handleSignup}
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-700 hover:to-red-700 transition-all disabled:opacity-70"
+                >
+                  {isLoading ? 'Creating...' : 'Create Account'} <ChevronRight className="inline" size={20} />
+                </button>
+              ) : (
+                <>
+                  {!otpRequested ? (
+                    <button
+                      type="button"
+                      onClick={handleRequestOtp}
+                      disabled={isLoading}
+                      className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-700 hover:to-red-700 transition-all disabled:opacity-70"
+                    >
+                      {isLoading ? 'Sending OTP...' : 'Send OTP'} <ShieldCheck className="inline" size={20} />
+                    </button>
+                  ) : (
+                    <>
+                      <input
+                        type="text"
+                        placeholder="Enter OTP"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleLogin}
+                        disabled={isLoading}
+                        className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-700 hover:to-red-700 transition-all disabled:opacity-70"
+                      >
+                        {isLoading ? 'Logging in...' : 'Verify & Login'} <ChevronRight className="inline" size={20} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleRequestOtp}
+                        disabled={isLoading || otpCountdown > 0}
+                        className="w-full text-orange-600 font-semibold py-2 hover:underline disabled:opacity-60"
+                      >
+                        {otpCountdown > 0 ? `Resend OTP in ${otpCountdown}s` : 'Resend OTP'}
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
             </div>
           </div>
 
@@ -202,15 +279,16 @@ const StudentLogin = () => {
             </span>
           </div>
 
-          {/* DEMO INFO */}
-          <div className="mt-6 p-4 bg-orange-50 rounded-xl border border-orange-200 text-center">
-            <p className="text-sm font-semibold text-orange-800">
-              Demo: Any email & password works
-            </p>
-            <p className="text-xs text-orange-600 mt-1">
-              Data stored in sessionStorage (bitezUser, bitezToken)
-            </p>
-          </div>
+          {!isSignup && (
+            <div className="mt-6 p-4 bg-orange-50 rounded-xl border border-orange-200 text-center">
+              <p className="text-sm font-semibold text-orange-800">
+                OTP is required for every login.
+              </p>
+              <p className="text-xs text-orange-600 mt-1">
+                Use your registered phone and email to receive the code.
+              </p>
+            </div>
+          )}
 
         </div>
       </div>
