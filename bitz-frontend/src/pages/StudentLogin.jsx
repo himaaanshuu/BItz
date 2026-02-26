@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { User, Eye, EyeOff, ChevronRight, ShieldCheck } from 'lucide-react';
 import { api } from '../services/api';
 
 const StudentLogin = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isSignup, setIsSignup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState('');
@@ -95,13 +96,22 @@ const StudentLogin = () => {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (otpCountdown <= 0) return;
     const timer = setInterval(() => {
       setOtpCountdown((prev) => prev - 1);
     }, 1000);
     return () => clearInterval(timer);
   }, [otpCountdown]);
+
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+    if (mode === 'signup') {
+      setIsSignup(true);
+      setOtpRequested(false);
+      setOtp('');
+    }
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-100 to-red-100">
@@ -190,21 +200,23 @@ const StudentLogin = () => {
               />
             )}
 
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Password *"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl pr-12 focus:border-orange-500 focus:outline-none"
-              />
-              <span
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </span>
-            </div>
+            {(isSignup || otpRequested) && (
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Password *"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl pr-12 focus:border-orange-500 focus:outline-none"
+                />
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </span>
+              </div>
+            )}
 
             <div className="space-y-2">
               {isSignup ? (
@@ -268,8 +280,11 @@ const StudentLogin = () => {
                 setEmail('');
                 setPassword('');
                 setPhone('');
-                setStudentId('');
+                setOtp('');
+                setOtpRequested(false);
+                setOtpPreview('');
                 setMessage('');
+                setError('');
               }}
               className="text-orange-600 font-semibold hover:underline cursor-pointer"
             >

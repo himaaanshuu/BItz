@@ -10,16 +10,19 @@ const TrackOrder = () => {
 
   useEffect(() => {
     const userData = localStorage.getItem('bitezUser');
-    const token = localStorage.getItem('bitezToken');
-    
-    if (!userData || !token) {
+    const token = localStorage.getItem('bitezAuthToken');
+    const hasAuthCookie = document.cookie
+      .split(';')
+      .some((cookie) => cookie.trim().startsWith('bitezAuth=student'));
+
+    if (!userData || !token || !hasAuthCookie) {
       navigate('/student-login');
       return;
     }
-    
+
     try {
       setUser(JSON.parse(userData));
-      
+
       // Load orders from localStorage
       const savedOrders = localStorage.getItem('bitezOrders');
       if (savedOrders) {
@@ -79,7 +82,7 @@ const TrackOrder = () => {
         <div className="flex justify-between items-center relative">
           {/* Progress Line */}
           <div className="absolute top-8 left-0 right-0 h-1 bg-gray-700 z-0">
-            <div 
+            <div
               className="h-full bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-500"
               style={{ width: `${getOrderProgress(status)}%` }}
             ></div>
@@ -89,15 +92,14 @@ const TrackOrder = () => {
           {steps.map((step, index) => {
             const isCompleted = index <= currentStatusIndex;
             const isCurrent = index === currentStatusIndex;
-            
+
             return (
               <div key={step.key} className="flex flex-col items-center z-10 relative">
-                <div 
-                  className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl mb-2 transition-all duration-300 ${
-                    isCompleted 
-                      ? 'bg-gradient-to-br from-orange-500 to-red-500 scale-110 shadow-lg shadow-orange-500/50' 
+                <div
+                  className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl mb-2 transition-all duration-300 ${isCompleted
+                      ? 'bg-gradient-to-br from-orange-500 to-red-500 scale-110 shadow-lg shadow-orange-500/50'
                       : 'bg-gray-800 border-2 border-gray-700'
-                  } ${isCurrent ? 'animate-pulse' : ''}`}
+                    } ${isCurrent ? 'animate-pulse' : ''}`}
                 >
                   {step.icon}
                 </div>
@@ -152,11 +154,10 @@ const TrackOrder = () => {
                 <div
                   key={order.id}
                   onClick={() => setSelectedOrder(order)}
-                  className={`bg-gradient-to-br from-gray-900 to-black border-2 p-4 rounded-xl cursor-pointer transition transform hover:scale-105 ${
-                    selectedOrder?.id === order.id 
-                      ? 'border-orange-500 shadow-lg shadow-orange-500/30' 
+                  className={`bg-gradient-to-br from-gray-900 to-black border-2 p-4 rounded-xl cursor-pointer transition transform hover:scale-105 ${selectedOrder?.id === order.id
+                      ? 'border-orange-500 shadow-lg shadow-orange-500/30'
                       : 'border-gray-700 hover:border-orange-500'
-                  }`}
+                    }`}
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div>

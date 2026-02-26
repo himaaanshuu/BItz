@@ -10,8 +10,11 @@ const CurrentOrder = () => {
 
   useEffect(() => {
     // Check if student is logged in
-    const token = localStorage.getItem('bitezToken');
-    if (!token || !token.startsWith('student_')) {
+    const token = localStorage.getItem('bitezAuthToken');
+    const hasAuthCookie = document.cookie
+      .split(';')
+      .some((cookie) => cookie.trim().startsWith('bitezAuth=student'));
+    if (!token || !hasAuthCookie) {
       navigate('/student-login');
       return;
     }
@@ -58,7 +61,7 @@ const CurrentOrder = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -96,7 +99,7 @@ const CurrentOrder = () => {
               {/* Progress Bar */}
               <div className="mb-6">
                 <div className="bg-purple-300 rounded-full h-4 overflow-hidden">
-                  <div 
+                  <div
                     className="bg-yellow-400 h-full transition-all duration-500 rounded-full"
                     style={{ width: `${getProgressPercentage()}%` }}
                   ></div>

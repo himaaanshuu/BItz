@@ -15,7 +15,7 @@ const AdminSettings = () => {
     openTime: '08:00',
     closeTime: '20:00'
   });
-  
+
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -24,8 +24,11 @@ const AdminSettings = () => {
 
   useEffect(() => {
     // Check if admin is logged in
-    const adminToken = localStorage.getItem('bitezAdminToken');
-    if (!adminToken || !adminToken.startsWith('admin_')) {
+    const adminToken = localStorage.getItem('bitezAuthToken');
+    const hasAuthCookie = document.cookie
+      .split(';')
+      .some((cookie) => cookie.trim().startsWith('bitezAuth=admin'));
+    if (!adminToken || !hasAuthCookie) {
       navigate('/admin-login');
       return;
     }
@@ -47,7 +50,7 @@ const AdminSettings = () => {
 
   const handleUpdateCanteen = (e) => {
     e.preventDefault();
-    
+
     if (!canteenData.canteenName || !canteenData.location || !canteenData.phone || !canteenData.email) {
       alert('Please fill all required fields!');
       return;
@@ -59,7 +62,7 @@ const AdminSettings = () => {
 
   const handleUpdatePassword = (e) => {
     e.preventDefault();
-    
+
     if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
       alert('Please fill all password fields!');
       return;
@@ -83,7 +86,7 @@ const AdminSettings = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -97,7 +100,7 @@ const AdminSettings = () => {
             <Building2 className="text-orange-600" size={28} />
             Canteen Information
           </h2>
-          
+
           <form onSubmit={handleUpdateCanteen} className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -202,7 +205,7 @@ const AdminSettings = () => {
         {/* Password Change */}
         <div className="bg-white rounded-2xl p-8 shadow-xl">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Change Password</h2>
-          
+
           <form onSubmit={handleUpdatePassword} className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">

@@ -15,8 +15,11 @@ const Profile = () => {
 
   useEffect(() => {
     // Check if student is logged in
-    const token = localStorage.getItem('bitezToken');
-    if (!token || !token.startsWith('student_')) {
+    const token = localStorage.getItem('bitezAuthToken');
+    const hasAuthCookie = document.cookie
+      .split(';')
+      .some((cookie) => cookie.trim().startsWith('bitezAuth=student'));
+    if (!token || !hasAuthCookie) {
       navigate('/student-login');
       return;
     }
@@ -37,7 +40,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -95,9 +98,8 @@ const Profile = () => {
                 value={userData.name}
                 onChange={(e) => setUserData({ ...userData, name: e.target.value })}
                 disabled={!isEditing}
-                className={`w-full px-4 py-3 border-2 rounded-lg text-lg ${
-                  isEditing ? 'border-purple-300 focus:border-purple-500 focus:outline-none' : 'border-gray-200 bg-gray-50'
-                }`}
+                className={`w-full px-4 py-3 border-2 rounded-lg text-lg ${isEditing ? 'border-purple-300 focus:border-purple-500 focus:outline-none' : 'border-gray-200 bg-gray-50'
+                  }`}
               />
             </div>
 
@@ -111,9 +113,8 @@ const Profile = () => {
                 value={userData.email}
                 onChange={(e) => setUserData({ ...userData, email: e.target.value })}
                 disabled={!isEditing}
-                className={`w-full px-4 py-3 border-2 rounded-lg text-lg ${
-                  isEditing ? 'border-purple-300 focus:border-purple-500 focus:outline-none' : 'border-gray-200 bg-gray-50'
-                }`}
+                className={`w-full px-4 py-3 border-2 rounded-lg text-lg ${isEditing ? 'border-purple-300 focus:border-purple-500 focus:outline-none' : 'border-gray-200 bg-gray-50'
+                  }`}
               />
             </div>
 
@@ -127,9 +128,8 @@ const Profile = () => {
                 value={userData.studentId}
                 onChange={(e) => setUserData({ ...userData, studentId: e.target.value })}
                 disabled={!isEditing}
-                className={`w-full px-4 py-3 border-2 rounded-lg text-lg ${
-                  isEditing ? 'border-purple-300 focus:border-purple-500 focus:outline-none' : 'border-gray-200 bg-gray-50'
-                }`}
+                className={`w-full px-4 py-3 border-2 rounded-lg text-lg ${isEditing ? 'border-purple-300 focus:border-purple-500 focus:outline-none' : 'border-gray-200 bg-gray-50'
+                  }`}
               />
             </div>
 
@@ -143,9 +143,8 @@ const Profile = () => {
                 value={userData.phone}
                 onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
                 disabled={!isEditing}
-                className={`w-full px-4 py-3 border-2 rounded-lg text-lg ${
-                  isEditing ? 'border-purple-300 focus:border-purple-500 focus:outline-none' : 'border-gray-200 bg-gray-50'
-                }`}
+                className={`w-full px-4 py-3 border-2 rounded-lg text-lg ${isEditing ? 'border-purple-300 focus:border-purple-500 focus:outline-none' : 'border-gray-200 bg-gray-50'
+                  }`}
               />
             </div>
           </div>

@@ -27,8 +27,11 @@ const AdminAnalytics = () => {
   });
 
   useEffect(() => {
-    const adminToken = localStorage.getItem('bitezAdminToken');
-    if (!adminToken || !adminToken.startsWith('admin_')) {
+    const adminToken = localStorage.getItem('bitezAuthToken');
+    const hasAuthCookie = document.cookie
+      .split(';')
+      .some((cookie) => cookie.trim().startsWith('bitezAuth=admin'));
+    if (!adminToken || !hasAuthCookie) {
       navigate('/admin-login');
       return;
     }
@@ -63,7 +66,8 @@ const AdminAnalytics = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('bitezAdmin');
-    localStorage.removeItem('bitezAdminToken');
+    localStorage.removeItem('bitezAuthToken');
+    document.cookie = 'bitezAuth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     navigate('/');
   };
 

@@ -13,17 +13,17 @@ const OrderPage = () => {
 
   useEffect(() => {
     // Load user data
-  const userData = localStorage.getItem('bitezUser') || sessionStorage.getItem('bitezUser');
-  const token = localStorage.getItem('bitezAuthToken');
+    const userData = localStorage.getItem('bitezUser') || sessionStorage.getItem('bitezUser');
+    const token = localStorage.getItem('bitezAuthToken');
     const hasAuthCookie = document.cookie
       .split(';')
       .some((cookie) => cookie.trim().startsWith('bitezAuth=student'));
-    
+
     if (!userData || !token || !hasAuthCookie) {
       navigate('/student-login');
       return;
     }
-    
+
     try {
       setUser(JSON.parse(userData));
     } catch (error) {
@@ -123,7 +123,7 @@ const OrderPage = () => {
 
   const handleCheckout = (paymentMethod) => {
     const tokenNumber = Math.floor(Math.random() * 900) + 100;
-    
+
     // Create order object
     const newOrder = {
       id: Date.now(),
@@ -148,16 +148,15 @@ const OrderPage = () => {
     localStorage.setItem('bitezOrders', JSON.stringify(existingOrders));
 
     alert(`Order Placed! 🎉\nToken Number: ${tokenNumber}\nPayment: ${paymentMethod}\nTotal: ₹${getCartTotal()}\n\nPlease collect your order from the canteen!`);
-    
+
     setCart([]);
     setShowPaymentModal(false);
     setShowCart(false);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('bitezToken');
+    localStorage.removeItem('bitezAuthToken');
     localStorage.removeItem('bitezUser');
-    sessionStorage.removeItem('bitezToken');
     sessionStorage.removeItem('bitezUser');
     document.cookie = 'bitezAuth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     navigate('/student-login');
@@ -180,8 +179,8 @@ const OrderPage = () => {
       <header className="bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 text-white p-4 shadow-lg">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           {/* Logo - Clickable */}
-          <div 
-            onClick={() => navigate('/')} 
+          <div
+            onClick={() => navigate('/')}
             className="cursor-pointer hover:opacity-80 transition"
           >
             <h1 className="text-3xl font-bold">BITEZ.</h1>
@@ -208,7 +207,7 @@ const OrderPage = () => {
                     <p className="font-bold text-gray-800">{user.name}</p>
                     <p className="text-sm text-gray-500">{user.email}</p>
                   </div>
-                  
+
                   <button
                     onClick={() => {
                       navigate('/order');
@@ -219,7 +218,7 @@ const OrderPage = () => {
                     <User size={18} />
                     Dashboard
                   </button>
-                  
+
                   <button
                     onClick={() => {
                       navigate('/track');
@@ -230,9 +229,9 @@ const OrderPage = () => {
                     <Package size={18} />
                     Track Orders
                   </button>
-                  
+
                   <hr className="my-2" />
-                  
+
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 font-semibold flex items-center gap-3"
@@ -268,7 +267,7 @@ const OrderPage = () => {
               Choose Your Canteen
             </h2>
             <p className="text-gray-600 mb-8">Select from our available canteens</p>
-            
+
             <div className="grid md:grid-cols-2 gap-6">
               {canteens.map(canteen => (
                 <div
@@ -303,7 +302,7 @@ const OrderPage = () => {
             >
               ← Back to Canteens
             </button>
-            
+
             <div className="bg-gradient-to-r from-orange-100 to-red-100 rounded-2xl p-6 mb-8">
               <h2 className="text-3xl font-bold text-gray-800 mb-2">{selectedCanteen.name}</h2>
               <p className="text-gray-700">📍 {selectedCanteen.location}</p>
@@ -325,7 +324,7 @@ const OrderPage = () => {
                         <p className="text-sm text-gray-500 mb-2">{item.category}</p>
                         <p className="text-2xl font-bold text-orange-600">₹{item.price}</p>
                       </div>
-                      
+
                       {quantity === 0 ? (
                         <button
                           onClick={() => addToCart(item, selectedCanteen)}
@@ -422,7 +421,7 @@ const OrderPage = () => {
                     </div>
                   </div>
 
-                  <button 
+                  <button
                     onClick={() => setShowPaymentModal(true)}
                     className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-600 hover:to-red-600 transition shadow-lg"
                   >
@@ -441,8 +440,8 @@ const OrderPage = () => {
           <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-3xl font-black text-gray-900">Choose Payment</h2>
-              <button 
-                onClick={() => setShowPaymentModal(false)} 
+              <button
+                onClick={() => setShowPaymentModal(false)}
                 className="text-gray-500 hover:text-gray-700"
               >
                 <X size={24} />
@@ -459,15 +458,15 @@ const OrderPage = () => {
             </div>
 
             <div className="space-y-4">
-              <button 
+              <button
                 onClick={() => handleCheckout('UPI')}
                 className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-5 rounded-2xl font-bold text-lg hover:scale-105 transition shadow-lg flex items-center justify-center gap-3"
               >
                 <CreditCard size={24} />
                 Pay via UPI
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => handleCheckout('Cash')}
                 className="w-full bg-white border-4 border-orange-500 text-orange-600 py-5 rounded-2xl font-bold text-lg hover:scale-105 transition shadow-lg flex items-center justify-center gap-3"
               >
