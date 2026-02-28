@@ -8,6 +8,12 @@ export const isValidPhone = (phone) => {
   return /^\+?[0-9]{10,15}$/.test(normalized);
 };
 
+/** Normalize for storage and comparison: strip whitespace. */
+export const normalizePhone = (phone) => {
+  if (!phone) return '';
+  return String(phone).replace(/\s+/g, '').trim();
+};
+
 export const validatePassword = (password) => {
   if (!password) return {
     valid: false,

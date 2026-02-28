@@ -24,28 +24,44 @@ const AdminLogin = () => {
     setError('');
   };
 
-  const startOtpTimer = () => {
-    setOtpCountdown(60);
+  // Fix #1: Normalize phone to always include leading +
+  const normalizePhone = (raw) => {
+    const trimmed = raw.trim().replace(/\s+/g, '');
+    return trimmed.startsWith('+') ? trimmed : `+${trimmed}`;
   };
+
+  // Fix #2: Normalize email to lowercase + trimmed
+  const normalizeEmail = (raw) => raw.trim().toLowerCase();
+
+  const startOtpTimer = () => setOtpCountdown(60);
 
   const handleRequestOtp = async () => {
     resetStatus();
-    if (!email || !phone) {
-      setError('Email and phone are required.');
+
+    if (!email || !phone || !password) {
+      setError('Email, phone, and password are required.');
       return;
     }
 
+    const normalizedEmail = normalizeEmail(email);
+    const normalizedPhone = normalizePhone(phone);
+
     setIsLoading(true);
     try {
-      const response = await api.requestAdminOtp({ email, phone });
-      setMessage(response.message || 'OTP sent to email and phone.');
+      const response = await api.requestAdminOtp({
+        email: normalizedEmail,
+        phone: normalizedPhone,
+      });
+      setMessage(response.message || 'OTP sent to your phone.');
       setOtpRequested(true);
       if (response.otp) {
         setOtpPreview(`Dev OTP: ${response.otp}`);
       }
       startOtpTimer();
     } catch (err) {
-      setError(err.message);
+      // Fix #3: Log full error for debugging, show message to user
+      console.error('[AdminLogin] OTP request failed:', err);
+      setError(err?.response?.data?.message || err.message || 'Failed to send OTP. Check your credentials.');
     } finally {
       setIsLoading(false);
     }
@@ -54,6 +70,7 @@ const AdminLogin = () => {
   const handleLogin = async () => {
     resetStatus();
     setOtpPreview('');
+
     if (!email || !password || !otp) {
       setError('Email, password, and OTP are required.');
       return;
@@ -61,13 +78,18 @@ const AdminLogin = () => {
 
     setIsLoading(true);
     try {
-      const data = await api.loginAdmin({ email, password, otp });
+      const data = await api.loginAdmin({
+        email: normalizeEmail(email),
+        password,
+        otp,
+      });
       localStorage.setItem('bitezAuthToken', data.token);
       localStorage.setItem('bitezAdmin', JSON.stringify(data.user));
       document.cookie = 'bitezAuth=admin; path=/; max-age=86400';
       navigate('/admin-dashboard');
     } catch (err) {
-      setError(err.message);
+      console.error('[AdminLogin] Login failed:', err);
+      setError(err?.response?.data?.message || err.message || 'Login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -114,38 +136,41 @@ const AdminLogin = () => {
               Admin accounts are created by the system administrator. Please login using your assigned credentials.
             </div>
 
+            {/* Fix #2: Email normalized on blur for better UX */}
             <input
               placeholder="Email"
               value={email}
               onChange={e => setEmail(e.target.value)}
+              onBlur={e => setEmail(normalizeEmail(e.target.value))}
               className="w-full px-4 py-3 border-2 rounded-xl"
             />
 
+            {/* Fix #1: Placeholder shows expected format */}
             <input
-              placeholder="Phone Number"
+              placeholder="Phone (e.g. +911234567890)"
               value={phone}
               onChange={e => setPhone(e.target.value)}
+              onBlur={e => setPhone(normalizePhone(e.target.value))}
               className="w-full px-4 py-3 border-2 rounded-xl"
             />
 
-            {otpRequested && (
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border-2 rounded-xl pr-12"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2"
-                >
-                  {showPassword ? <EyeOff /> : <Eye />}
-                </button>
-              </div>
-            )}
+            {/* Fix #4: Password shown upfront so all 3 fields are validated together */}
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="w-full px-4 py-3 border-2 rounded-xl pr-12"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2"
+              >
+                {showPassword ? <EyeOff /> : <Eye />}
+              </button>
+            </div>
 
             {otpRequested && (
               <input

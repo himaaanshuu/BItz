@@ -4,9 +4,11 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import Otp from '../models/Otp.js';
 import auth from '../middleware/auth.js';
-import { isValidEmail, isValidPhone, validatePassword } from '../utils/validation.js';
+import requireRole from '../middleware/requireRole.js';
+import { isValidEmail, isValidPhone, validatePassword, normalizePhone } from '../utils/validation.js';
 import { generateOtp, hashOtp, compareOtp } from '../utils/otp.js';
 import { sendOtpSms } from '../utils/notification.js';
+import { safeErrorMessage } from '../utils/safeError.js';
 
 const router = express.Router();
 
@@ -49,7 +51,7 @@ router.post('/student/register', async (req, res) => {
     const user = await User.create({
       name,
       email,
-      phone,
+      phone: normalizePhone(phone),
       password: hashedPassword,
       role: 'student',
     });
@@ -59,7 +61,7 @@ router.post('/student/register', async (req, res) => {
       message: 'Student account created. Please request OTP to login.',
     });
   } catch (error) {
-    return res.status(500).json({ message: 'Registration failed', error: error.message });
+    return res.status(500).json({ message: safeErrorMessage('Registration failed', error) });
   }
 });
 
@@ -103,7 +105,9 @@ const handleOtpRequest = async ({ req, res, role }) => {
     return res.status(404).json({ message: 'Account not found.' });
   }
 
-  if (user.phone !== phone) {
+  const phoneNorm = normalizePhone(phone);
+  const userPhoneNorm = normalizePhone(user.phone);
+  if (userPhoneNorm !== phoneNorm) {
     return res.status(401).json({ message: 'Phone number does not match our records.' });
   }
 
@@ -119,7 +123,7 @@ router.post('/student/request-otp', async (req, res) => {
   try {
     return await handleOtpRequest({ req, res, role: 'student' });
   } catch (error) {
-    return res.status(500).json({ message: 'OTP request failed', error: error.message });
+    return res.status(500).json({ message: safeErrorMessage('OTP request failed', error) });
   }
 });
 
@@ -127,12 +131,14 @@ router.post('/admin/request-otp', async (req, res) => {
   try {
     return await handleOtpRequest({ req, res, role: 'admin' });
   } catch (error) {
-    return res.status(500).json({ message: 'OTP request failed', error: error.message });
+    return res.status(500).json({ message: safeErrorMessage('OTP request failed', error) });
   }
 });
 
 const handleLogin = async ({ req, res, role }) => {
-  const { email, password, otp } = req.body;
+  const { email, password } = req.body;
+  let { otp } = req.body;
+  otp = typeof otp === 'string' ? otp.trim() : (otp != null ? String(otp).trim() : '');
 
   if (!email || !password || !otp) {
     return res.status(400).json({ message: 'Email, password, and OTP are required.' });
@@ -174,7 +180,7 @@ router.post('/student/login', async (req, res) => {
   try {
     return await handleLogin({ req, res, role: 'student' });
   } catch (error) {
-    return res.status(500).json({ message: 'Login failed', error: error.message });
+    return res.status(500).json({ message: safeErrorMessage('Login failed', error) });
   }
 });
 
@@ -182,7 +188,39 @@ router.post('/admin/login', async (req, res) => {
   try {
     return await handleLogin({ req, res, role: 'admin' });
   } catch (error) {
-    return res.status(500).json({ message: 'Login failed', error: error.message });
+    return res.status(500).json({ message: safeErrorMessage('Login failed', error) });
+  }
+});
+
+router.post('/change-password', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Current password and new password are required.' });
+    }
+
+    const passwordCheck = validatePassword(newPassword);
+    if (!passwordCheck.valid) {
+      return res.status(400).json({ message: passwordCheck.message });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Current password is incorrect.' });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    return res.status(200).json({ message: 'Password updated successfully.' });
+  } catch (error) {
+    return res.status(500).json({ message: safeErrorMessage('Password update failed', error) });
   }
 });
 
@@ -195,7 +233,7 @@ router.get('/me', auth, async (req, res) => {
 
     return res.status(200).json({ user });
   } catch (error) {
-    return res.status(500).json({ message: 'Failed to load profile', error: error.message });
+    return res.status(500).json({ message: safeErrorMessage('Failed to load profile', error) });
   }
 });
 

@@ -3,6 +3,7 @@ import Canteen from '../models/Canteen.js';
 import auth from '../middleware/auth.js';
 import requireRole from '../middleware/requireRole.js';
 import { isValidEmail, isValidPhone } from '../utils/validation.js';
+import { safeErrorMessage } from '../utils/safeError.js';
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ router.get('/public', async (req, res) => {
     const canteens = await Canteen.find().select('-menuItems.createdAt -menuItems.updatedAt');
     return res.status(200).json({ canteens });
   } catch (error) {
-    return res.status(500).json({ message: 'Failed to load canteens', error: error.message });
+    return res.status(500).json({ message: safeErrorMessage('Failed to load canteens', error) });
   }
 });
 
@@ -20,7 +21,7 @@ router.get('/me', auth, requireRole('admin'), async (req, res) => {
     const canteen = await Canteen.findOne({ ownerId: req.user.id });
     return res.status(200).json({ canteen });
   } catch (error) {
-    return res.status(500).json({ message: 'Failed to load canteen', error: error.message });
+    return res.status(500).json({ message: safeErrorMessage('Failed to load canteen', error) });
   }
 });
 
@@ -52,7 +53,7 @@ router.post('/me', auth, requireRole('admin'), async (req, res) => {
 
     return res.status(201).json({ canteen });
   } catch (error) {
-    return res.status(500).json({ message: 'Failed to create canteen', error: error.message });
+    return res.status(500).json({ message: safeErrorMessage('Failed to create canteen', error) });
   }
 });
 
@@ -80,7 +81,7 @@ router.put('/me', auth, requireRole('admin'), async (req, res) => {
 
     return res.status(200).json({ canteen });
   } catch (error) {
-    return res.status(500).json({ message: 'Failed to update canteen', error: error.message });
+    return res.status(500).json({ message: safeErrorMessage('Failed to update canteen', error) });
   }
 });
 
@@ -102,7 +103,7 @@ router.post('/me/menu', auth, requireRole('admin'), async (req, res) => {
 
     return res.status(201).json({ canteen });
   } catch (error) {
-    return res.status(500).json({ message: 'Failed to add menu item', error: error.message });
+    return res.status(500).json({ message: safeErrorMessage('Failed to add menu item', error) });
   }
 });
 
@@ -130,7 +131,7 @@ router.put('/me/menu/:itemId', auth, requireRole('admin'), async (req, res) => {
 
     return res.status(200).json({ canteen });
   } catch (error) {
-    return res.status(500).json({ message: 'Failed to update menu item', error: error.message });
+    return res.status(500).json({ message: safeErrorMessage('Failed to update menu item', error) });
   }
 });
 
@@ -153,7 +154,7 @@ router.delete('/me/menu/:itemId', auth, requireRole('admin'), async (req, res) =
 
     return res.status(200).json({ canteen });
   } catch (error) {
-    return res.status(500).json({ message: 'Failed to delete menu item', error: error.message });
+    return res.status(500).json({ message: safeErrorMessage('Failed to delete menu item', error) });
   }
 });
 

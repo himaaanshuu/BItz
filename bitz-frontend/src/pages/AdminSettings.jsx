@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Save, Eye, EyeOff, Building2, MapPin, Phone, Mail, Clock } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import { api } from '../services/api';
 
 const AdminSettings = () => {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ const AdminSettings = () => {
     alert('Canteen details updated successfully!');
   };
 
-  const handleUpdatePassword = (e) => {
+  const handleUpdatePassword = async (e) => {
     e.preventDefault();
 
     if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
@@ -73,14 +74,21 @@ const AdminSettings = () => {
       return;
     }
 
-    if (passwordData.newPassword.length < 6) {
-      alert('Password must be at least 6 characters long!');
+    if (passwordData.newPassword.length < 8) {
+      alert('Password must be at least 8 characters and include upper, lower, number, and special character.');
       return;
     }
 
-    // In production, verify current password with backend
-    alert('Password updated successfully!');
-    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    try {
+      await api.changePasswordAdmin({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+      alert('Password updated successfully!');
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      alert(err.message || 'Password update failed.');
+    }
   };
 
   return (

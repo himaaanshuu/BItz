@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Plus, Minus, X, ChevronRight, CreditCard, Wallet, User, LogOut, Package } from 'lucide-react';
+import { api } from '../services/api';
+import { CardPaymentModal } from '../components/CardPaymentModal';
 
 const OrderPage = () => {
+  const [canteens, setCanteens] = useState([]);
+  const [canteensLoading, setCanteensLoading] = useState(true);
   const [selectedCanteen, setSelectedCanteen] = useState(null);
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [user, setUser] = useState(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [paymentInProgress, setPaymentInProgress] = useState(false);
+  const [cardPaymentClientSecret, setCardPaymentClientSecret] = useState(null);
+  const [cardPaymentTotal, setCardPaymentTotal] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Load user data
     const userData = localStorage.getItem('bitezUser') || sessionStorage.getItem('bitezUser');
     const token = localStorage.getItem('bitezAuthToken');
     const hasAuthCookie = document.cookie
@@ -32,126 +38,147 @@ const OrderPage = () => {
     }
   }, [navigate]);
 
-  const canteens = [
-    {
-      id: 1,
-      name: "Main Canteen",
-      location: "Ground Floor, Building A",
-      timing: "8:00 AM - 8:00 PM",
-      menu: [
-        { id: 101, name: "Veg Burger", price: 60, category: "Fast Food", image: "🍔" },
-        { id: 102, name: "Pizza Slice", price: 80, category: "Fast Food", image: "🍕" },
-        { id: 103, name: "French Fries", price: 40, category: "Snacks", image: "🍟" },
-        { id: 104, name: "Cold Coffee", price: 50, category: "Beverages", image: "☕" },
-        { id: 105, name: "Sandwich", price: 45, category: "Snacks", image: "🥪" },
-      ]
-    },
-    {
-      id: 2,
-      name: "South Canteen",
-      location: "2nd Floor, Building B",
-      timing: "9:00 AM - 6:00 PM",
-      menu: [
-        { id: 201, name: "Masala Dosa", price: 70, category: "South Indian", image: "🥘" },
-        { id: 202, name: "Idli Sambhar", price: 50, category: "South Indian", image: "🍚" },
-        { id: 203, name: "Vada", price: 30, category: "South Indian", image: "🥯" },
-        { id: 204, name: "Filter Coffee", price: 25, category: "Beverages", image: "☕" },
-        { id: 205, name: "Upma", price: 40, category: "South Indian", image: "🍜" },
-      ]
-    },
-    {
-      id: 3,
-      name: "North Canteen",
-      location: "1st Floor, Building C",
-      timing: "8:30 AM - 7:00 PM",
-      menu: [
-        { id: 301, name: "Chole Bhature", price: 80, category: "North Indian", image: "🫓" },
-        { id: 302, name: "Paneer Paratha", price: 60, category: "North Indian", image: "🥙" },
-        { id: 303, name: "Samosa", price: 20, category: "Snacks", image: "🥟" },
-        { id: 304, name: "Lassi", price: 35, category: "Beverages", image: "🥛" },
-        { id: 305, name: "Rajma Chawal", price: 90, category: "North Indian", image: "🍛" },
-      ]
-    },
-    {
-      id: 4,
-      name: "Juice Corner",
-      location: "Near Library",
-      timing: "7:00 AM - 9:00 PM",
-      menu: [
-        { id: 401, name: "Fresh Orange Juice", price: 40, category: "Fresh Juice", image: "🍊" },
-        { id: 402, name: "Watermelon Juice", price: 35, category: "Fresh Juice", image: "🍉" },
-        { id: 403, name: "Mixed Fruit Smoothie", price: 60, category: "Smoothies", image: "🥤" },
-        { id: 404, name: "Banana Shake", price: 50, category: "Shakes", image: "🍌" },
-        { id: 405, name: "Lemonade", price: 25, category: "Beverages", image: "🍋" },
-      ]
-    }
-  ];
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { canteens: list } = await api.getCanteensPublic();
+        if (!cancelled && list?.length) {
+          setCanteens(list.map((c) => ({
+            id: c._id,
+            _id: c._id,
+            name: c.name,
+            location: c.location,
+            timing: c.timings || '',
+            menu: (c.menuItems || []).filter((i) => i.available !== false).map((i) => ({
+              id: i._id,
+              _id: i._id,
+              name: i.name,
+              price: i.price,
+              category: i.category || '',
+              image: '🍽️',
+            })),
+          })));
+        }
+      } catch (err) {
+        if (!cancelled) console.error('Failed to load canteens:', err);
+      } finally {
+        if (!cancelled) setCanteensLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const addToCart = (item, canteen) => {
-    const existingItem = cart.find(cartItem => cartItem.id === item.id);
+    const canteenId = canteen._id || canteen.id;
+    const existingItem = cart.find((cartItem) => cartItem.id === item.id && cartItem.canteenId === canteenId);
     if (existingItem) {
-      setCart(cart.map(cartItem =>
-        cartItem.id === item.id
+      setCart(cart.map((cartItem) =>
+        cartItem.id === item.id && cartItem.canteenId === canteenId
           ? { ...cartItem, quantity: cartItem.quantity + 1 }
           : cartItem
       ));
     } else {
-      setCart([...cart, { ...item, quantity: 1, canteenName: canteen.name }]);
+      setCart([...cart, { ...item, quantity: 1, canteenName: canteen.name, canteenId }]);
     }
   };
 
-  const removeFromCart = (itemId) => {
-    const existingItem = cart.find(cartItem => cartItem.id === itemId);
+  const removeFromCart = (itemId, canteenId) => {
+    const existingItem = canteenId != null
+      ? cart.find((c) => c.id === itemId && c.canteenId === canteenId)
+      : cart.find((c) => c.id === itemId);
+    if (!existingItem) return;
     if (existingItem.quantity === 1) {
-      setCart(cart.filter(cartItem => cartItem.id !== itemId));
+      setCart(cart.filter((c) => !(c.id === itemId && (canteenId == null || c.canteenId === canteenId))));
     } else {
-      setCart(cart.map(cartItem =>
-        cartItem.id === itemId
-          ? { ...cartItem, quantity: cartItem.quantity - 1 }
-          : cartItem
+      setCart(cart.map((c) =>
+        c.id === itemId && (canteenId == null || c.canteenId === canteenId) ? { ...c, quantity: c.quantity - 1 } : c
       ));
     }
   };
 
   const getCartTotal = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
   const getCartItemCount = () => {
     return cart.reduce((total, item) => total + item.quantity, 0);
   };
 
-  const handleCheckout = (paymentMethod) => {
-    const tokenNumber = Math.floor(Math.random() * 900) + 100;
+  const createOrderAndPay = async (paymentMethod) => {
+    if (cart.length === 0) {
+      alert('Your cart is empty.');
+      return;
+    }
+    const primaryCanteenId = cart[0].canteenId;
+    const orderItems = cart.filter((i) => i.canteenId === primaryCanteenId);
+    const total = orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-    // Create order object
-    const newOrder = {
-      id: Date.now(),
-      date: new Date().toLocaleString(),
-      status: 'Pending',
-      total: getCartTotal(),
-      estimatedTime: '25-30 mins',
-      deliveryAddress: 'Campus Hostel',
-      paymentMethod: paymentMethod,
-      tokenNumber: tokenNumber,
-      items: cart.map(item => ({
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-        canteen: item.canteenName
-      }))
-    };
+    setPaymentInProgress(true);
+    try {
+      const { order } = await api.createOrder({
+        canteenId: primaryCanteenId,
+        items: orderItems.map((i) => ({
+          name: i.name,
+          price: i.price,
+          quantity: i.quantity,
+          category: i.category,
+          canteenName: i.canteenName,
+        })),
+        total,
+        paymentMethod: paymentMethod.toLowerCase(),
+        deliveryAddress: 'Campus Hostel',
+      });
 
-    // Save to localStorage
-    const existingOrders = JSON.parse(localStorage.getItem('bitezOrders') || '[]');
-    existingOrders.unshift(newOrder);
-    localStorage.setItem('bitezOrders', JSON.stringify(existingOrders));
+      if (paymentMethod.toLowerCase() === 'cash') {
+        setCart(cart.filter((i) => i.canteenId !== primaryCanteenId));
+        setShowPaymentModal(false);
+        setShowCart(false);
+        alert(`Order placed! Token: ${order.tokenNumber}. Pay ₹${order.total} in cash at the canteen.`);
+        setPaymentInProgress(false);
+        return;
+      }
 
-    alert(`Order Placed! 🎉\nToken Number: ${tokenNumber}\nPayment: ${paymentMethod}\nTotal: ₹${getCartTotal()}\n\nPlease collect your order from the canteen!`);
+      if (paymentMethod.toLowerCase() === 'upi') {
+        const { upiUri } = await api.createUpiIntent({
+          amount: order.total,
+          note: `Order #${order.tokenNumber}`,
+        });
+        if (upiUri) window.open(upiUri, '_blank');
+        setCart(cart.filter((i) => i.canteenId !== primaryCanteenId));
+        setShowPaymentModal(false);
+        setShowCart(false);
+        alert(`Complete payment in your UPI app. Token: ${order.tokenNumber}. Total: ₹${order.total}`);
+        setPaymentInProgress(false);
+        return;
+      }
 
-    setCart([]);
+      if (paymentMethod.toLowerCase() === 'card') {
+        try {
+          const { clientSecret } = await api.createPaymentIntent(order._id);
+          setCardPaymentClientSecret(clientSecret);
+          setCardPaymentTotal(order.total);
+        } catch (err) {
+          alert(err.message || 'Card payment not available.');
+        }
+        setPaymentInProgress(false);
+        return;
+      }
+    } catch (err) {
+      alert(err.message || 'Order failed.');
+    }
+    setPaymentInProgress(false);
+  };
+
+  const onCardPaymentSuccess = () => {
+    setCardPaymentClientSecret(null);
+    setCardPaymentTotal(0);
+    const primaryCanteenId = cart[0]?.canteenId;
+    if (primaryCanteenId) setCart(cart.filter((i) => i.canteenId !== primaryCanteenId));
     setShowPaymentModal(false);
     setShowCart(false);
+    alert('Payment successful! Your order is confirmed.');
+    setPaymentInProgress(false);
   };
 
   const handleLogout = () => {
@@ -268,6 +295,13 @@ const OrderPage = () => {
             </h2>
             <p className="text-gray-600 mb-8">Select from our available canteens</p>
 
+            {canteensLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-orange-500"></div>
+              </div>
+            ) : canteens.length === 0 ? (
+              <p className="text-gray-500 text-center py-12">No canteens available yet. Check back later.</p>
+            ) : (
             <div className="grid md:grid-cols-2 gap-6">
               {canteens.map(canteen => (
                 <div
@@ -287,11 +321,12 @@ const OrderPage = () => {
                     {canteen.menu.slice(0, 3).map(item => (
                       <span key={item.id} className="text-2xl">{item.image}</span>
                     ))}
-                    <span className="text-gray-500 text-sm self-center">+{canteen.menu.length - 3} more</span>
+                    <span className="text-gray-500 text-sm self-center">+{Math.max(0, canteen.menu.length - 3)} more</span>
                   </div>
                 </div>
               ))}
             </div>
+            )}
           </div>
         ) : (
           /* Menu Display */
@@ -312,7 +347,8 @@ const OrderPage = () => {
             <h3 className="text-2xl font-bold mb-6 text-gray-800">Menu</h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {selectedCanteen.menu.map(item => {
-                const cartItem = cart.find(c => c.id === item.id);
+                const cid = selectedCanteen._id || selectedCanteen.id;
+                const cartItem = cart.find(c => c.id === item.id && c.canteenId === cid);
                 const quantity = cartItem ? cartItem.quantity : 0;
 
                 return (
@@ -335,7 +371,7 @@ const OrderPage = () => {
                       ) : (
                         <div className="flex items-center justify-between bg-orange-100 rounded-lg p-2">
                           <button
-                            onClick={() => removeFromCart(item.id)}
+                            onClick={() => removeFromCart(item.id, selectedCanteen._id || selectedCanteen.id)}
                             className="bg-white text-orange-600 w-10 h-10 rounded-lg flex items-center justify-center hover:bg-gray-100 transition"
                           >
                             <Minus size={20} />
@@ -394,13 +430,13 @@ const OrderPage = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => removeFromCart(item.id)}
+                            onClick={() => removeFromCart(item.id, item.canteenId)}
                             className="bg-white text-orange-600 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 border border-orange-200"
                           >
                             <Minus size={16} />
                           </button>
                           <button
-                            onClick={() => addToCart(item, { name: item.canteenName })}
+                            onClick={() => addToCart(item, { name: item.canteenName, _id: item.canteenId, id: item.canteenId })}
                             className="bg-white text-orange-600 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 border border-orange-200"
                           >
                             <Plus size={16} />
@@ -459,21 +495,44 @@ const OrderPage = () => {
 
             <div className="space-y-4">
               <button
-                onClick={() => handleCheckout('UPI')}
-                className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-5 rounded-2xl font-bold text-lg hover:scale-105 transition shadow-lg flex items-center justify-center gap-3"
+                onClick={() => createOrderAndPay('UPI')}
+                disabled={paymentInProgress}
+                className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-5 rounded-2xl font-bold text-lg hover:scale-105 transition shadow-lg flex items-center justify-center gap-3 disabled:opacity-70"
               >
                 <CreditCard size={24} />
                 Pay via UPI
               </button>
 
               <button
-                onClick={() => handleCheckout('Cash')}
-                className="w-full bg-white border-4 border-orange-500 text-orange-600 py-5 rounded-2xl font-bold text-lg hover:scale-105 transition shadow-lg flex items-center justify-center gap-3"
+                onClick={() => createOrderAndPay('Cash')}
+                disabled={paymentInProgress}
+                className="w-full bg-white border-4 border-orange-500 text-orange-600 py-5 rounded-2xl font-bold text-lg hover:scale-105 transition shadow-lg flex items-center justify-center gap-3 disabled:opacity-70"
               >
                 <Wallet size={24} />
                 Pay with Cash
               </button>
+
+              <button
+                onClick={() => createOrderAndPay('Card')}
+                disabled={paymentInProgress}
+                className="w-full bg-gray-800 text-white py-5 rounded-2xl font-bold text-lg hover:scale-105 transition shadow-lg flex items-center justify-center gap-3 disabled:opacity-70"
+              >
+                <CreditCard size={24} />
+                Pay with Card
+              </button>
             </div>
+
+            {cardPaymentClientSecret && (
+              <div className="mt-6 pt-6 border-t">
+                <h3 className="font-bold text-gray-800 mb-3">Complete card payment</h3>
+                <CardPaymentModal
+                  clientSecret={cardPaymentClientSecret}
+                  total={cardPaymentTotal}
+                  onSuccess={onCardPaymentSuccess}
+                  onCancel={() => { setCardPaymentClientSecret(null); setCardPaymentTotal(0); }}
+                />
+              </div>
+            )}
 
             <p className="text-center text-gray-500 text-sm mt-6">
               Your order will be confirmed after payment

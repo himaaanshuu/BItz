@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../services/api';
 
 const TrackOrder = () => {
   const [user, setUser] = useState(null);
@@ -22,17 +23,34 @@ const TrackOrder = () => {
 
     try {
       setUser(JSON.parse(userData));
-
-      // Load orders from localStorage
-      const savedOrders = localStorage.getItem('bitezOrders');
-      if (savedOrders) {
-        setOrders(JSON.parse(savedOrders));
-      }
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
+    } catch (e) {
       setLoading(false);
+      return;
     }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const { orders: list } = await api.getOrdersMe();
+        if (!cancelled)
+          setOrders((list || []).map((o) => ({
+            id: o._id,
+            _id: o._id,
+            date: o.createdAt ? new Date(o.createdAt).toLocaleString() : '',
+            status: o.status || 'pending',
+            total: o.total,
+            items: o.items || [],
+            deliveryAddress: o.deliveryAddress,
+            tokenNumber: o.tokenNumber,
+            canteen: o.canteenId?.name || 'Canteen',
+          })));
+      } catch (error) {
+        if (!cancelled) console.error('Error loading orders:', error);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, [navigate]);
 
   const getStatusColor = (status) => {
@@ -161,7 +179,7 @@ const TrackOrder = () => {
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <p className="font-bold text-white">Order #{order.id}</p>
+                      <p className="font-bold text-white">Order #{order.tokenNumber ?? order.id}</p>
                       <p className="text-gray-400 text-sm">{order.date}</p>
                     </div>
                     <span className={`px-3 py-1 text-xs rounded-full text-white font-semibold ${getStatusColor(order.status)}`}>
@@ -180,7 +198,7 @@ const TrackOrder = () => {
                 <div className="bg-gradient-to-br from-gray-900 to-black border-2 border-red-500 rounded-2xl p-6 shadow-xl">
                   <div className="flex justify-between items-start mb-6">
                     <div>
-                      <h2 className="text-2xl font-bold text-orange-500">Order #{selectedOrder.id}</h2>
+                      <h2 className="text-2xl font-bold text-orange-500">Order #{selectedOrder.tokenNumber ?? selectedOrder.id}</h2>
                       <p className="text-gray-400 mt-1">{selectedOrder.date}</p>
                     </div>
                     <span className={`px-4 py-2 text-sm rounded-full text-white font-bold ${getStatusColor(selectedOrder.status)}`}>

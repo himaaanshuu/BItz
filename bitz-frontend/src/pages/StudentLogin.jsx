@@ -83,7 +83,7 @@ const StudentLogin = () => {
 
     setIsLoading(true);
     try {
-      const data = await api.loginStudent({ email, password, otp });
+      const data = await api.loginStudent({ email, password, otp: otp.trim() });
       localStorage.setItem('bitezAuthToken', data.token);
       localStorage.setItem('bitezUser', JSON.stringify(data.user));
       document.cookie = 'bitezAuth=student; path=/; max-age=86400';
@@ -243,9 +243,12 @@ const StudentLogin = () => {
                     <>
                       <input
                         type="text"
-                        placeholder="Enter OTP"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        maxLength={6}
+                        placeholder="Enter 6-digit OTP"
                         value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none"
                       />
                       <button

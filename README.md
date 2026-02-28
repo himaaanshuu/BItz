@@ -98,10 +98,13 @@ npm run dev --workspace=bitz-backend
 Example `bitz-backend/.env` (adjust to what's in your `.env.example`):
 
 ```env
-PORT=5000
+PORT=5001
 MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/bitz?retryWrites=true&w=majority
-JWT_SECRET=your_jwt_secret_here
-# any other env vars used by your backend (e.g., SMTP settings, OTP TTL)
+JWT_SECRET=your_jwt_secret_at_least_32_chars_in_production
+CLIENT_ORIGIN=http://localhost:5173
+
+# Optional: Twilio (OTP), UPI_VPA (UPI), STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET (card payments)
+# See bitz-backend/.env.example for full list.
 ```
 
 Keep secrets out of source control. Use a secrets manager or environment-specific configuration for production.

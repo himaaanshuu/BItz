@@ -109,4 +109,38 @@ export const api = {
     });
     return handleResponse(response);
   },
+  createPaymentIntent: async (orderId) => {
+    const response = await fetch(`${API_URL}/payments/create-payment-intent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...withAuth() },
+      body: JSON.stringify({ orderId }),
+    });
+    return handleResponse(response);
+  },
+  getCanteensPublic: async () => {
+    const response = await fetch(`${API_URL}/canteens/public`);
+    return handleResponse(response);
+  },
+  createOrder: async (payload) => {
+    const response = await fetch(`${API_URL}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...withAuth() },
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(response);
+  },
+  getOrdersMe: async () => {
+    const response = await fetch(`${API_URL}/orders/me`, {
+      headers: { ...withAuth() },
+    });
+    return handleResponse(response);
+  },
+  changePasswordAdmin: async (payload) => {
+    const response = await fetch(`${API_URL}/auth/change-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...withAuth() },
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(response);
+  },
 };
