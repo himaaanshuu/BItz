@@ -36,10 +36,8 @@ const clientOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (process.env.NODE_ENV === 'production' && !origin) {
-        return callback(new Error('CORS not allowed: missing origin'));
-      }
-      if (!origin || clientOrigins.length === 0) {
+      if (!origin) {
+        // Allow server-to-server or Postman requests (missing origin)
         return callback(null, true);
       }
 

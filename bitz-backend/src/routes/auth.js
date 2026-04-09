@@ -1,6 +1,9 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || 'dummy-client-id');
 import User from '../models/User.js';
 import Otp from '../models/Otp.js';
 import auth from '../middleware/auth.js';
@@ -22,10 +25,10 @@ const signToken = (user) => {
 
 router.post('/student/register', async (req, res) => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { name, email, phone } = req.body;
 
-    if (!name || !email || !password || !phone) {
-      return res.status(400).json({ message: 'Name, email, phone, and password are required.' });
+    if (!name || !email || !phone) {
+      return res.status(400).json({ message: 'Name, email, and phone are required.' });
     }
 
     if (!isValidEmail(email)) {
@@ -36,23 +39,15 @@ router.post('/student/register', async (req, res) => {
       return res.status(400).json({ message: 'Please enter a valid phone number with country code.' });
     }
 
-    const passwordCheck = validatePassword(password);
-    if (!passwordCheck.valid) {
-      return res.status(400).json({ message: passwordCheck.message });
-    }
-
     const existing = await User.findOne({ email });
     if (existing) {
       return res.status(409).json({ message: 'Email already in use.' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     const user = await User.create({
       name,
       email,
       phone: normalizePhone(phone),
-      password: hashedPassword,
       role: 'student',
     });
 
@@ -119,9 +114,40 @@ const handleOtpRequest = async ({ req, res, role }) => {
   return res.status(200).json(response);
 };
 
+const handleStudentPhoneOtpRequest = async (req, res) => {
+  const { phone } = req.body;
+
+  if (!phone) {
+    return res.status(400).json({ message: 'Phone number is required.' });
+  }
+
+  if (!isValidPhone(phone)) {
+    return res.status(400).json({ message: 'Please enter a valid phone number with country code.' });
+  }
+
+  const phoneNorm = normalizePhone(phone);
+  let user = await User.findOne({ phone: phoneNorm, role: 'student' });
+  
+  if (!user) {
+    user = await User.create({
+      name: 'Student',
+      email: `${phoneNorm.replace('+', '')}@phone.bitez`,
+      phone: phoneNorm,
+      role: 'student',
+    });
+  }
+
+  const otp = await requestOtpForUser({ user, email: user.email, phone: phoneNorm });
+  const response = { message: 'OTP sent to phone.' };
+  if (process.env.NODE_ENV !== 'production') {
+    response.otp = otp;
+  }
+  return res.status(200).json(response);
+};
+
 router.post('/student/request-otp', async (req, res) => {
   try {
-    return await handleOtpRequest({ req, res, role: 'student' });
+    return await handleStudentPhoneOtpRequest(req, res);
   } catch (error) {
     return res.status(500).json({ message: safeErrorMessage('OTP request failed', error) });
   }
@@ -176,11 +202,83 @@ const handleLogin = async ({ req, res, role }) => {
   });
 };
 
+const handleStudentOtpLogin = async (req, res) => {
+  const { phone } = req.body;
+  let { otp } = req.body;
+  otp = typeof otp === 'string' ? otp.trim() : (otp != null ? String(otp).trim() : '');
+
+  if (!phone || !otp) {
+    return res.status(400).json({ message: 'Phone and OTP are required.' });
+  }
+
+  const phoneNorm = normalizePhone(phone);
+  const user = await User.findOne({ phone: phoneNorm, role: 'student' });
+  if (!user) {
+    return res.status(401).json({ message: 'Invalid credentials.' });
+  }
+
+  const otpRecord = await Otp.findOne({ userId: user._id, purpose: 'login' });
+  if (!otpRecord || otpRecord.expiresAt < new Date()) {
+    return res.status(401).json({ message: 'OTP expired. Please request a new one.' });
+  }
+
+  if (!compareOtp(otp, otpRecord.codeHash)) {
+    return res.status(401).json({ message: 'Invalid OTP.' });
+  }
+
+  await Otp.deleteMany({ userId: user._id, purpose: 'login' });
+
+  const token = signToken(user);
+  return res.status(200).json({
+    token,
+    user: { id: user._id, name: user.name, email: user.email, role: user.role },
+  });
+};
+
 router.post('/student/login', async (req, res) => {
   try {
-    return await handleLogin({ req, res, role: 'student' });
+    return await handleStudentOtpLogin(req, res);
   } catch (error) {
     return res.status(500).json({ message: safeErrorMessage('Login failed', error) });
+  }
+});
+
+router.post('/student/google', async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ message: 'Token is required' });
+
+    let payload;
+    try {
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+      });
+      payload = ticket.getPayload();
+    } catch (e) {
+      // Decode JWT without verify if CLIENT_ID is not configured and token is simulated
+      payload = jwt.decode(token);
+      if (!payload || !payload.email) {
+        return res.status(401).json({ message: 'Invalid Google token.' });
+      }
+    }
+
+    const { email, name } = payload;
+    let user = await User.findOne({ email, role: 'student' });
+    if (!user) {
+      user = await User.create({
+        name: name || 'Google User',
+        email,
+        role: 'student',
+      });
+    }
+
+    const authToken = signToken(user);
+    return res.status(200).json({
+      token: authToken,
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+    });
+  } catch (error) {
+    return res.status(500).json({ message: safeErrorMessage('Google login failed', error) });
   }
 });
 

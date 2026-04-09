@@ -60,7 +60,7 @@ const TrackOrder = () => {
       case 'preparing':
         return 'bg-blue-600';
       case 'ready':
-        return 'bg-purple-600';
+        return 'bg-amber-600';
       case 'out for delivery':
         return 'bg-orange-600';
       case 'delivered':
@@ -135,9 +135,15 @@ const TrackOrder = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-red-500 mx-auto mb-4"></div>
-          <p className="text-white text-xl">Loading orders...</p>
+        <div className="text-center p-8 glass-panel rounded-3xl mt-12 animate-in zoom-in duration-300">
+          <div className="w-20 h-20 mx-auto mb-4 relative">
+             <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=128&q=80" alt="Loading burger" className="w-full h-full object-cover rounded-full animate-bounce shadow-lg" />
+             <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center animate-spin">
+               <div className="w-5 h-5 border-t-2 border-orange-500 rounded-full"></div>
+             </div>
+          </div>
+          <h2 className="text-2xl font-black text-white">Tracking Order...</h2>
+          <p className="text-gray-400 font-medium">Please wait while we fetch your details</p>
         </div>
       </div>
     );

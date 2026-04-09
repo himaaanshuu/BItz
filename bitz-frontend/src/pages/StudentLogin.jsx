@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { User, Eye, EyeOff, ChevronRight, ShieldCheck } from 'lucide-react';
+import { User, ChevronRight, ShieldCheck } from 'lucide-react';
 import { api } from '../services/api';
+import { GoogleLogin } from '@react-oauth/google';
 
 const StudentLogin = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [isSignup, setIsSignup] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -15,9 +13,6 @@ const StudentLogin = () => {
   const [otpCountdown, setOtpCountdown] = useState(0);
   const [otpPreview, setOtpPreview] = useState('');
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
 
@@ -26,48 +21,36 @@ const StudentLogin = () => {
     setError('');
   };
 
+  const normalizePhone = (raw) => {
+    const trimmed = raw.trim().replace(/\s+/g, '');
+    return trimmed.startsWith('+') ? trimmed : `+${trimmed}`;
+  };
+
+  const normalizeEmail = (raw) => raw.trim().toLowerCase();
+
   const startOtpTimer = () => {
     setOtpCountdown(60);
   };
 
-  const handleSignup = async () => {
-    resetStatus();
-    if (!name || !email || !password || !phone) {
-      setError('Please fill in name, email, phone, and password.');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await api.registerStudent({ name, email, password, phone });
-      setMessage('Account created. Please request OTP to login.');
-      setIsSignup(false);
-      setOtpRequested(false);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleRequestOtp = async () => {
     resetStatus();
-    if (!email || !phone) {
-      setError('Please enter your email and phone number.');
+    if (!phone) {
+      setError('Please enter your phone number.');
       return;
     }
 
     setIsLoading(true);
     try {
-      const response = await api.requestStudentOtp({ email, phone });
-      setMessage(response.message || 'OTP sent. Please check your email and phone.');
+      const response = await api.requestStudentOtp({ phone: normalizePhone(phone) });
+      setMessage(response.message || 'OTP sent. Please check your phone.');
       setOtpRequested(true);
       if (response.otp) {
         setOtpPreview(`Dev OTP: ${response.otp}`);
       }
       startOtpTimer();
     } catch (err) {
-      setError(err.message);
+      console.error('[StudentLogin] OTP request failed:', err);
+      setError(err?.response?.data?.message || err.message || 'Failed to send OTP. Check your credentials.');
     } finally {
       setIsLoading(false);
     }
@@ -76,21 +59,43 @@ const StudentLogin = () => {
   const handleLogin = async () => {
     resetStatus();
     setOtpPreview('');
-    if (!email || !password || !otp) {
-      setError('Email, password, and OTP are required.');
+    if (!phone || !otp) {
+      setError('Phone and OTP are required.');
       return;
     }
 
     setIsLoading(true);
     try {
-      const data = await api.loginStudent({ email, password, otp: otp.trim() });
+      const data = await api.loginStudent({ 
+        phone: normalizePhone(phone), 
+        otp: otp.trim() 
+      });
       localStorage.setItem('bitezAuthToken', data.token);
       localStorage.setItem('bitezUser', JSON.stringify(data.user));
       document.cookie = 'bitezAuth=student; path=/; max-age=86400';
       setMessage('Login successful. Redirecting...');
       navigate('/order');
     } catch (err) {
-      setError(err.message);
+      console.error('[StudentLogin] Login failed:', err);
+      setError(err?.response?.data?.message || err.message || 'Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    resetStatus();
+    setIsLoading(true);
+    try {
+      const data = await api.loginStudentGoogle({ token: credentialResponse.credential });
+      localStorage.setItem('bitezAuthToken', data.token);
+      localStorage.setItem('bitezUser', JSON.stringify(data.user));
+      document.cookie = 'bitezAuth=student; path=/; max-age=86400';
+      setMessage('Login successful. Redirecting...');
+      navigate('/order');
+    } catch (err) {
+      console.error('[StudentLogin] Google Login failed:', err);
+      setError(err?.response?.data?.message || err.message || 'Google Login failed.');
     } finally {
       setIsLoading(false);
     }
@@ -104,43 +109,41 @@ const StudentLogin = () => {
     return () => clearInterval(timer);
   }, [otpCountdown]);
 
-  useEffect(() => {
-    const mode = searchParams.get('mode');
-    if (mode === 'signup') {
-      setIsSignup(true);
-      setOtpRequested(false);
-      setOtp('');
-    }
-  }, [searchParams]);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-100 to-red-100">
+    <div className="min-h-screen bg-[#FAFAFA] relative overflow-hidden flex flex-col">
+      {/* Background Decorators */}
+      <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] bg-orange-100/50 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-float pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-sky-100/50 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-float pointer-events-none" style={{ animationDelay: '2s' }} />
+
       {/* Navbar */}
-      <nav className="bg-white shadow-md p-4">
-        <div className="max-w-6xl mx-auto">
+      <nav className="relative z-10 p-6 glass-panel border-b border-white border-opacity-50 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto w-full">
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="text-2xl font-bold text-orange-600 hover:text-orange-500"
+            className="font-black text-2xl tracking-tight flex items-center gap-2 text-slate-800 hover:scale-105 transition-transform"
           >
-            BITEZ
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-rose-500 flex justify-center items-center text-white text-xl">
+              B
+            </div>
+            ITEZ.
           </button>
         </div>
       </nav>
 
-      <div className="flex items-center justify-center px-4 py-12">
-        <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full">
+      <div className="flex-1 flex items-center justify-center px-4 py-12 relative z-10">
+        <div className="glass p-10 max-w-md w-full rounded-[2.5rem] border border-white shadow-2xl shadow-slate-200/50">
 
           {/* Header */}
           <div className="text-center mb-8">
-            <User className="mx-auto mb-4 text-orange-600" size={64} />
-            <h2 className="text-4xl font-black text-gray-900">
-              {isSignup ? 'Student Sign Up' : 'Student Login'}
+            <div className="w-20 h-20 mx-auto bg-gradient-to-tr from-orange-400 to-rose-500 rounded-[2rem] flex items-center justify-center text-white mb-6 shadow-lg shadow-orange-500/30 rotate-3 hover:rotate-0 transition-transform">
+              <User size={36} />
+            </div>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+              Welcome back
             </h2>
-            <p className="text-gray-600 mt-2">
-              {isSignup
-                ? 'Create your student account'
-                : 'Login to order your food'}
+            <p className="text-slate-500 font-medium mt-2">
+              Log in to order your favorite food.
             </p>
           </div>
 
@@ -162,151 +165,109 @@ const StudentLogin = () => {
           )}
 
           {/* FORM */}
-          <div className="space-y-4">
-            {isSignup && (
+          <div className="space-y-5">
+            {!otpRequested && (
               <>
-                <input
-                  type="text"
-                  placeholder="Full Name *"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none"
-                />
-                <input
-                  type="tel"
-                  placeholder="Phone Number *"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none"
-                />
+                <div className="flex justify-center mb-6">
+                  <div className="hover:scale-105 transition-transform">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={() => setError('Google Login Failed')}
+                      theme="outline"
+                      size="large"
+                      text="continue_with"
+                      shape="pill"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-4 my-6 opacity-60">
+                  <div className="h-px bg-slate-200 flex-1"></div>
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Or login via phone</div>
+                  <div className="h-px bg-slate-200 flex-1"></div>
+                </div>
               </>
             )}
 
-            <input
-              type="email"
-              placeholder="Student Email *"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none"
-            />
-
-            {!isSignup && (
+            <div className="relative group">
+              <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-focus-within:text-orange-500 transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+              </span>
               <input
                 type="tel"
-                placeholder="Phone Number *"
+                placeholder="Phone Number"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none"
+                onBlur={(e) => setPhone(normalizePhone(e.target.value))}
+                disabled={otpRequested}
+                className="w-full pl-12 pr-5 py-3.5 bg-white border border-slate-200 rounded-2xl font-medium focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all shadow-sm disabled:opacity-50 disabled:bg-slate-50"
               />
-            )}
+            </div>
 
-            {(isSignup || otpRequested) && (
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Password *"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl pr-12 focus:border-orange-500 focus:outline-none"
-                />
-                <span
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </span>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              {isSignup ? (
+            <div className="space-y-3">
+              {!otpRequested ? (
                 <button
                   type="button"
-                  onClick={handleSignup}
+                  onClick={handleRequestOtp}
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-700 hover:to-red-700 transition-all disabled:opacity-70"
+                  className="w-full bg-slate-900 text-white py-3.5 rounded-2xl font-bold text-lg hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:opacity-70 flex justify-center items-center gap-2"
                 >
-                  {isLoading ? 'Creating...' : 'Create Account'} <ChevronRight className="inline" size={20} />
+                  {isLoading ? 'Sending OTP...' : 'Send OTP'}
+                  <ShieldCheck size={20} className={isLoading ? 'animate-pulse' : ''} />
                 </button>
               ) : (
-                <>
-                  {!otpRequested ? (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    placeholder="Enter 6-digit OTP"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl font-bold tracking-[0.2em] text-center text-xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all shadow-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleLogin}
+                    disabled={isLoading}
+                    className="w-full bg-orange-600 text-white py-3.5 rounded-2xl font-bold text-lg hover:bg-orange-700 transition-all shadow-lg shadow-orange-600/30 hover:shadow-xl hover:-translate-y-1 disabled:opacity-70 flex justify-center items-center gap-2"
+                  >
+                    {isLoading ? 'Verifying...' : 'Verify & Login'}
+                    <ChevronRight size={20} />
+                  </button>
+                  <div className="flex justify-between items-center text-sm px-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOtpRequested(false);
+                        setOtp('');
+                        resetStatus();
+                      }}
+                      disabled={isLoading}
+                      className="text-slate-500 font-bold hover:text-slate-800 transition-colors disabled:opacity-50"
+                    >
+                      ← Back
+                    </button>
                     <button
                       type="button"
                       onClick={handleRequestOtp}
-                      disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-700 hover:to-red-700 transition-all disabled:opacity-70"
+                      disabled={isLoading || otpCountdown > 0}
+                      className={`font-bold transition-colors ${otpCountdown > 0 ? 'text-slate-400 cursor-not-allowed' : 'text-orange-600 hover:text-orange-700'}`}
                     >
-                      {isLoading ? 'Sending OTP...' : 'Send OTP'} <ShieldCheck className="inline" size={20} />
+                      {otpCountdown > 0 ? `Resend (${otpCountdown}s)` : 'Resend OTP'}
                     </button>
-                  ) : (
-                    <>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        autoComplete="one-time-code"
-                        maxLength={6}
-                        placeholder="Enter 6-digit OTP"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleLogin}
-                        disabled={isLoading}
-                        className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-700 hover:to-red-700 transition-all disabled:opacity-70"
-                      >
-                        {isLoading ? 'Logging in...' : 'Verify & Login'} <ChevronRight className="inline" size={20} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleRequestOtp}
-                        disabled={isLoading || otpCountdown > 0}
-                        className="w-full text-orange-600 font-semibold py-2 hover:underline disabled:opacity-60"
-                      >
-                        {otpCountdown > 0 ? `Resend OTP in ${otpCountdown}s` : 'Resend OTP'}
-                      </button>
-                    </>
-                  )}
-                </>
+                  </div>
+                </div>
               )}
             </div>
           </div>
-
-          {/* TOGGLE */}
-          <div className="mt-6 text-center">
-            <span
-              onMouseDown={() => {
-                setIsSignup(!isSignup);
-                setName('');
-                setEmail('');
-                setPassword('');
-                setPhone('');
-                setOtp('');
-                setOtpRequested(false);
-                setOtpPreview('');
-                setMessage('');
-                setError('');
-              }}
-              className="text-orange-600 font-semibold hover:underline cursor-pointer"
-            >
-              {isSignup
-                ? 'Already have an account? Login'
-                : "Don't have an account? Sign Up"}
-            </span>
+          
+          <div className="mt-8 pt-6 border-t border-slate-100 text-center">
+            <p className="text-xs font-semibold text-slate-400">
+              By logging in, you agree to our Terms of Service and Privacy Policy. Mobile numbers are securely verified via OTP authentication.
+            </p>
           </div>
-
-          {!isSignup && (
-            <div className="mt-6 p-4 bg-orange-50 rounded-xl border border-orange-200 text-center">
-              <p className="text-sm font-semibold text-orange-800">
-                OTP is required for every login.
-              </p>
-              <p className="text-xs text-orange-600 mt-1">
-                Use your registered phone and email to receive the code.
-              </p>
-            </div>
-          )}
 
         </div>
       </div>

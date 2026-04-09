@@ -258,62 +258,73 @@ const CanteenDashboard = () => {
 
   if (!canteenData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-orange-100">
-        <div className="text-center">
-          <Store size={64} className="text-orange-600 mx-auto" />
-          <p className="mt-4 text-gray-700">Loading canteen profile...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA]">
+        <div className="text-center animate-pulse">
+          <Store size={64} className="text-orange-500 mx-auto" />
+          <p className="mt-6 text-slate-500 font-bold text-xl">Loading your canteen universe...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100">
+    <div className="min-h-screen bg-[#FAFAFA] text-slate-800 relative pb-20">
+      {/* Background Decorators */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-sky-100/50 rounded-full mix-blend-multiply filter blur-3xl opacity-50 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-orange-100/50 rounded-full mix-blend-multiply filter blur-3xl opacity-50 pointer-events-none" />
 
       {/* HEADER */}
-      <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white p-6 shadow-lg">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div>
-            <h1 className="text-4xl font-black">{canteenData.canteenName}</h1>
-            <p className="opacity-90">📍 {canteenData.location}</p>
+      <div className="relative z-10 pt-8 pb-10 px-8 bg-white border-b border-slate-100">
+        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-900 text-white flex items-center justify-center shadow-lg shadow-slate-900/20">
+              <Store size={28} />
+            </div>
+            <div>
+              <h1 className="text-3xl font-black text-slate-900">{canteenData.canteenName || 'Your Canteen'}</h1>
+              <p className="text-slate-500 font-medium mt-1 flex items-center gap-2">
+                <span className="bg-sky-100 text-sky-700 px-2.5 py-0.5 rounded-full text-xs font-bold border border-sky-200">ADMIN</span>
+                📍 {canteenData.location || "Location not set"}
+              </p>
+            </div>
           </div>
 
           {/* ACCOUNT DROPDOWN */}
           <div className="relative">
             <button
               onClick={() => setShowAccountMenu(!showAccountMenu)}
-              className="bg-white text-orange-600 px-6 py-3 rounded-lg font-bold flex items-center gap-2"
+              className="bg-white text-slate-700 border border-slate-200 px-5 py-2.5 rounded-full font-bold flex items-center gap-3 hover:border-orange-500 hover:text-orange-600 transition-all shadow-sm"
             >
-              👤 Account <ChevronDown size={18} />
+              <div className="bg-orange-50 text-orange-600 p-1 rounded-full"><Store size={16} /></div>
+              Manage <ChevronDown size={16} className={`text-slate-400 transition-transform ${showAccountMenu ? 'rotate-180' : ''}`} />
             </button>
 
             {showAccountMenu && (
-              <div className="absolute right-0 mt-3 w-52 bg-white rounded-xl shadow-xl border z-50">
-                <button
-                  onClick={() => window.location.href = '/admin-analytics'}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100"
-                >
-                  <BarChart2 size={18} className="text-blue-600" />
-                  Analytics
-                </button>
-
-                <button
-                  onClick={() => window.location.href = '/admin-settings'}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100"
-                >
-                  <Settings size={18} className="text-gray-600" />
-                  Settings
-                </button>
-
-                <div className="border-t" />
-
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-600"
-                >
-                  <LogOut size={18} />
-                  Logout
-                </button>
+              <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 animate-in fade-in slide-in-from-top-2 overflow-hidden">
+                <div className="px-5 py-3 bg-slate-50 border-b border-slate-100">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Quick Actions</p>
+                </div>
+                <div className="py-2">
+                  <button
+                    onClick={() => window.location.href = '/admin-analytics'}
+                    className="w-full flex items-center gap-3 px-5 py-2.5 hover:bg-orange-50 hover:text-orange-600 font-medium text-slate-600 transition-colors"
+                  >
+                    <BarChart2 size={16} /> Analytics
+                  </button>
+                  <button
+                    onClick={() => window.location.href = '/admin-settings'}
+                    className="w-full flex items-center gap-3 px-5 py-2.5 hover:bg-orange-50 hover:text-orange-600 font-medium text-slate-600 transition-colors"
+                  >
+                    <Settings size={16} /> Settings
+                  </button>
+                  <div className="border-t border-slate-100 my-2" />
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-5 py-2.5 hover:bg-red-50 text-red-600 font-bold transition-colors"
+                  >
+                    <LogOut size={16} /> Logout
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -321,7 +332,7 @@ const CanteenDashboard = () => {
       </div>
 
       {/* DASHBOARD CONTENT */}
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-[1400px] mx-auto p-8 relative z-10">
         {(message || error) && (
           <div className="mb-6">
             {message && (
@@ -337,36 +348,36 @@ const CanteenDashboard = () => {
           </div>
         )}
 
-        <div className="grid lg:grid-cols-3 gap-6 mb-10">
-          <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-xl border">
-            <h2 className="text-2xl font-black mb-4">Canteen Profile</h2>
-            <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid lg:grid-cols-3 gap-8 mb-10">
+          <div className="lg:col-span-2 glass-panel p-8 rounded-[2rem] border border-white">
+            <h2 className="text-2xl font-black text-slate-800 mb-6">Canteen Profile</h2>
+            <div className="grid md:grid-cols-2 gap-5">
               <input
-                className="px-4 py-3 border rounded-xl"
+                className="px-5 py-3.5 bg-white border border-slate-200 rounded-xl font-medium focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all shadow-sm"
                 placeholder="Canteen Name"
                 value={canteenForm.name}
                 onChange={(e) => handleCanteenChange('name', e.target.value)}
               />
               <input
-                className="px-4 py-3 border rounded-xl"
+                className="px-5 py-3.5 bg-white border border-slate-200 rounded-xl font-medium focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all shadow-sm"
                 placeholder="Location"
                 value={canteenForm.location}
                 onChange={(e) => handleCanteenChange('location', e.target.value)}
               />
               <input
-                className="px-4 py-3 border rounded-xl"
+                className="px-5 py-3.5 bg-white border border-slate-200 rounded-xl font-medium focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all shadow-sm"
                 placeholder="Timings"
                 value={canteenForm.timings}
                 onChange={(e) => handleCanteenChange('timings', e.target.value)}
               />
               <input
-                className="px-4 py-3 border rounded-xl"
+                className="px-5 py-3.5 bg-white border border-slate-200 rounded-xl font-medium focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all shadow-sm"
                 placeholder="Contact Phone"
                 value={canteenForm.contactPhone}
                 onChange={(e) => handleCanteenChange('contactPhone', e.target.value)}
               />
               <input
-                className="px-4 py-3 border rounded-xl md:col-span-2"
+                className="px-5 py-3.5 bg-white border border-slate-200 rounded-xl font-medium focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all shadow-sm md:col-span-2"
                 placeholder="Contact Email"
                 value={canteenForm.contactEmail}
                 onChange={(e) => handleCanteenChange('contactEmail', e.target.value)}
@@ -375,144 +386,171 @@ const CanteenDashboard = () => {
             <button
               onClick={handleSaveCanteen}
               disabled={isSaving}
-              className="mt-4 bg-orange-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-700 disabled:opacity-70"
+              className="mt-6 bg-slate-900 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-slate-800 disabled:opacity-70 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all w-full md:w-auto"
             >
-              {isSaving ? 'Saving...' : 'Save Profile'}
+              {isSaving ? 'Saving...' : 'Save Profile Changes'}
             </button>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-xl border">
-            <h2 className="text-2xl font-black mb-4">Add Menu Item</h2>
-            <div className="space-y-3">
+          <div className="glass p-8 rounded-[2rem] border border-white">
+            <h2 className="text-2xl font-black text-slate-800 mb-6">Add Menu Item</h2>
+            <div className="space-y-4">
               <input
-                className="w-full px-4 py-3 border rounded-xl"
+                className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-xl font-medium focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all shadow-sm"
                 placeholder="Item Name"
                 value={menuDraft.name}
                 onChange={(e) => handleMenuDraft('name', e.target.value)}
               />
               <input
-                className="w-full px-4 py-3 border rounded-xl"
-                placeholder="Category"
+                className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-xl font-medium focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all shadow-sm"
+                placeholder="Category (e.g. Snacks, Drinks)"
                 value={menuDraft.category}
                 onChange={(e) => handleMenuDraft('category', e.target.value)}
               />
-              <input
-                type="number"
-                className="w-full px-4 py-3 border rounded-xl"
-                placeholder="Price"
-                value={menuDraft.price}
-                onChange={(e) => handleMenuDraft('price', e.target.value)}
-              />
-              <label className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="relative">
+                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
+                <input
+                  type="number"
+                  className="w-full pl-10 pr-5 py-3.5 bg-white border border-slate-200 rounded-xl font-medium focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all shadow-sm"
+                  placeholder="Price"
+                  value={menuDraft.price}
+                  onChange={(e) => handleMenuDraft('price', e.target.value)}
+                />
+              </div>
+              <label className="flex items-center gap-3 text-sm font-bold text-slate-700 bg-white p-4 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:border-orange-300 transition-colors">
                 <input
                   type="checkbox"
+                  className="w-5 h-5 rounded text-orange-600 focus:ring-orange-500"
                   checked={menuDraft.available}
                   onChange={(e) => handleMenuDraft('available', e.target.checked)}
                 />
-                Available
+                Mark as Available
               </label>
               <button
                 onClick={handleAddMenuItem}
                 disabled={isSaving}
-                className="w-full bg-gray-900 text-white py-3 rounded-xl font-bold hover:bg-black disabled:opacity-70"
+                className="w-full bg-orange-500 text-white py-3.5 rounded-xl font-bold hover:bg-orange-600 disabled:opacity-70 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
               >
-                Add Item
+                <Store size={18} />
+                Add Item to Menu
               </button>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-xl border mb-10">
-          <h2 className="text-2xl font-black mb-4">Menu Items</h2>
+        <div className="glass-panel rounded-[2rem] border border-white p-8 mb-10">
+          <h2 className="text-2xl font-black text-slate-800 mb-6">Your Menu</h2>
           {canteenData.menuItems?.length ? (
-            <div className="space-y-4">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {canteenData.menuItems.map((item) => (
-                <div key={item._id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border rounded-xl p-4">
-                  <div>
-                    <p className="font-bold text-lg">{item.name}</p>
-                    <p className="text-sm text-gray-600">{item.category} · ₹{item.price}</p>
-                    <p className="text-xs text-gray-500">{item.available ? 'Available' : 'Unavailable'}</p>
-                  </div>
-                  <div className="flex gap-2">
+                <div key={item._id} className="bg-white border text-center border-slate-100 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                  <div className={`absolute top-0 inset-x-0 h-1.5 ${item.available ? 'bg-emerald-400' : 'bg-rose-400'}`} />
+                  <p className="font-black text-xl text-slate-800 mb-1">{item.name}</p>
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">{item.category}</p>
+                  <p className="text-3xl font-black text-slate-900 mb-4">₹{item.price}</p>
+                  
+                  <div className="flex gap-2 justify-center">
                     <button
                       onClick={() => handleToggleAvailability(item)}
-                      className="px-4 py-2 rounded-lg border text-sm font-semibold"
+                      className={`flex-1 px-4 py-2 rounded-xl text-sm font-bold border transition-colors ${
+                        item.available 
+                          ? 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100' 
+                          : 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100'
+                      }`}
                     >
-                      {item.available ? 'Mark Unavailable' : 'Mark Available'}
+                      {item.available ? 'Set Unavailable' : 'Set Available'}
                     </button>
                     <button
                       onClick={() => handleDeleteMenuItem(item._id)}
-                      className="px-4 py-2 rounded-lg border text-sm font-semibold text-red-600 border-red-200 hover:bg-red-50"
+                      className="px-4 py-2 rounded-xl text-sm font-bold border bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-red-600 transition-colors"
                     >
-                      Remove
+                      Delete
                     </button>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-gray-600">No menu items yet. Add your first item.</p>
+            <div className="text-center py-10 bg-white/50 rounded-2xl border border-dashed border-slate-300">
+              <p className="text-slate-500 font-bold text-lg">Your menu is empty.</p>
+              <p className="text-slate-400 font-medium">Add some delicious items above!</p>
+            </div>
           )}
         </div>
         {/* Stats */}
-        <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5 mb-10">
           {[
-            { label: 'Pending', value: stats.pending, icon: Clock, color: 'yellow' },
-            { label: 'Preparing', value: stats.preparing, icon: Package, color: 'blue' },
-            { label: 'Ready', value: stats.ready, icon: CheckCircle, color: 'green' },
-            { label: 'Completed', value: stats.completed, icon: XCircle, color: 'gray' },
-            { label: 'Revenue', value: `₹${stats.todayRevenue}`, icon: DollarSign, color: 'orange' },
-            { label: 'Orders', value: stats.totalOrders, icon: Users, color: 'purple' }
+            { label: 'Pending', value: stats.pending, icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50' },
+            { label: 'Preparing', value: stats.preparing, icon: Package, color: 'text-sky-500', bg: 'bg-sky-50' },
+            { label: 'Ready', value: stats.ready, icon: CheckCircle, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+            { label: 'Completed', value: stats.completed, icon: XCircle, color: 'text-slate-500', bg: 'bg-slate-50' },
+            { label: 'Revenue', value: `₹${stats.todayRevenue}`, icon: DollarSign, color: 'text-orange-500', bg: 'bg-orange-50' },
+            { label: 'Orders', value: stats.totalOrders, icon: Users, color: 'text-indigo-500', bg: 'bg-indigo-50' }
           ].map((stat, i) => (
-            <div key={i} className="bg-white rounded-xl p-6 shadow-lg border">
-              <stat.icon size={28} />
-              <p className="text-2xl font-black mt-2">{stat.value}</p>
-              <p className="text-sm text-gray-600">{stat.label}</p>
+            <div key={i} className="glass p-6 rounded-[2rem] hover:-translate-y-1 transition-all">
+              <div className={`w-12 h-12 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mb-4 border border-white`}>
+                <stat.icon size={24} />
+              </div>
+              <p className="text-3xl font-black text-slate-800">{stat.value}</p>
+              <p className="text-sm font-semibold text-slate-500 mt-1">{stat.label}</p>
             </div>
           ))}
         </div>
 
         {/* Orders */}
-        <div className="bg-white rounded-2xl p-8 shadow-xl">
-          <h2 className="text-3xl font-black mb-6">Active Orders</h2>
+        <div className="bg-white rounded-[2rem] p-8 shadow-xl border border-slate-100">
+          <h2 className="text-2xl font-black text-slate-800 mb-8 border-b border-slate-100 pb-4">Live Kitchen Feed</h2>
 
-          {orders.filter(o => o.status !== 'completed').map(order => (
-            <div
-              key={order.id}
-              className={`border-2 rounded-xl p-6 mb-4 ${getStatusColor(order.status)}`}
-            >
-              <h3 className="font-bold text-xl mb-2">
-                Token #{order.tokenNumber} – ₹{order.total}
-              </h3>
+          <div className="grid lg:grid-cols-2 gap-6">
+            {orders.filter(o => o.status !== 'completed').map(order => (
+              <div
+                key={order.id}
+                className={`border-2 rounded-[1.5rem] p-6 shadow-sm transition-all hover:shadow-md ${getStatusColor(order.status)}`}
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <span className="bg-white border text-slate-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm inline-block mb-3">
+                      Token #{order.tokenNumber}
+                    </span>
+                    <h3 className="font-bold text-2xl text-slate-900 border-b border-black/5 pb-2 mb-2">
+                       ₹{order.total} • <span className="capitalize">{order.status}</span>
+                    </h3>
+                    <p className="text-sm font-semibold opacity-70">Ordered by: {order.customerName}</p>
+                  </div>
+                  <div className="text-right flex flex-col items-end">
+                    <span className="text-sm font-bold opacity-70">{order.time}</span>
+                  </div>
+                </div>
 
-              <div className="flex gap-2">
-                {order.status === 'pending' && (
-                  <button
-                    onClick={() => updateOrderStatus(order.id, 'preparing')}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-                  >
-                    Start Preparing
-                  </button>
-                )}
-                {order.status === 'preparing' && (
-                  <button
-                    onClick={() => updateOrderStatus(order.id, 'ready')}
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg"
-                  >
-                    Mark Ready
-                  </button>
-                )}
-                {order.status === 'ready' && (
-                  <button
-                    onClick={() => updateOrderStatus(order.id, 'completed')}
-                    className="bg-gray-600 text-white px-4 py-2 rounded-lg"
-                  >
-                    Complete Order
-                  </button>
-                )}
+                <div className="flex flex-wrap gap-2 mt-6 border-t border-black/5 pt-4">
+                  {order.status === 'pending' && (
+                    <button
+                      onClick={() => updateOrderStatus(order.id, 'preparing')}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-sm transition-colors w-full"
+                    >
+                      Fire Order (Start Prep)
+                    </button>
+                  )}
+                  {order.status === 'preparing' && (
+                    <button
+                      onClick={() => updateOrderStatus(order.id, 'ready')}
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-sm transition-colors w-full"
+                    >
+                      Food is Ready!
+                    </button>
+                  )}
+                  {order.status === 'ready' && (
+                    <button
+                      onClick={() => updateOrderStatus(order.id, 'completed')}
+                      className="bg-slate-300 hover:bg-slate-400 text-slate-800 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-colors w-full"
+                    >
+                      Handed Over (Complete)
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

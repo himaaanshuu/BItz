@@ -56,7 +56,7 @@ const OrderPage = () => {
               name: i.name,
               price: i.price,
               category: i.category || '',
-              image: '🍽️',
+              image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=128&q=80',
             })),
           })));
         }
@@ -191,10 +191,15 @@ const OrderPage = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-white text-xl">Loading...</p>
+      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
+        <div className="text-center p-8 glass-panel rounded-3xl animate-in zoom-in duration-300">
+          <div className="w-20 h-20 mx-auto mb-4 relative">
+             <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=128&q=80" alt="Loading burger" className="w-full h-full object-cover rounded-full animate-bounce shadow-lg" />
+             <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center animate-spin">
+               <div className="w-5 h-5 border-t-2 border-orange-500 rounded-full"></div>
+             </div>
+          </div>
+          <h2 className="text-2xl font-black text-slate-800">Authenticating...</h2>
         </div>
       </div>
     );
@@ -297,7 +302,10 @@ const OrderPage = () => {
 
             {canteensLoading ? (
               <div className="flex justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-orange-500"></div>
+                <div className="w-16 h-16 relative">
+                   <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=128&q=80" alt="Loading burger" className="w-full h-full object-cover rounded-full animate-spin shadow-[0_0_15px_rgba(249,115,22,0.3)]" />
+                   <div className="absolute inset-0 rounded-full border-2 border-orange-500 border-t-transparent animate-spin-slow"></div>
+                </div>
               </div>
             ) : canteens.length === 0 ? (
               <p className="text-gray-500 text-center py-12">No canteens available yet. Check back later.</p>
@@ -312,14 +320,14 @@ const OrderPage = () => {
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-2xl font-bold text-gray-800 mb-2">{canteen.name}</h3>
-                      <p className="text-gray-600 text-sm mb-1">📍 {canteen.location}</p>
-                      <p className="text-gray-600 text-sm">🕐 {canteen.timing}</p>
+                      <p className="text-gray-600 text-sm mb-1 flex items-center gap-1.5"><MapPin size={14} className="text-orange-500" /> {canteen.location}</p>
+                      <p className="text-gray-600 text-sm flex items-center gap-1.5"><Clock size={14} className="text-orange-500" /> {canteen.timing}</p>
                     </div>
                     <ChevronRight className="text-orange-600" size={28} />
                   </div>
                   <div className="flex gap-2 flex-wrap mt-4">
                     {canteen.menu.slice(0, 3).map(item => (
-                      <span key={item.id} className="text-2xl">{item.image}</span>
+                      <img key={item.id} src={item.image} alt={item.name} className="w-8 h-8 rounded-full object-cover border border-slate-200" />
                     ))}
                     <span className="text-gray-500 text-sm self-center">+{Math.max(0, canteen.menu.length - 3)} more</span>
                   </div>
@@ -340,8 +348,8 @@ const OrderPage = () => {
 
             <div className="bg-gradient-to-r from-orange-100 to-red-100 rounded-2xl p-6 mb-8">
               <h2 className="text-3xl font-bold text-gray-800 mb-2">{selectedCanteen.name}</h2>
-              <p className="text-gray-700">📍 {selectedCanteen.location}</p>
-              <p className="text-gray-700">🕐 {selectedCanteen.timing}</p>
+              <p className="text-gray-700 flex items-center gap-1.5"><MapPin size={16} className="text-orange-600" /> {selectedCanteen.location}</p>
+              <p className="text-gray-700 flex items-center gap-1.5"><Clock size={16} className="text-orange-600" /> {selectedCanteen.timing}</p>
             </div>
 
             <h3 className="text-2xl font-bold mb-6 text-gray-800">Menu</h3>
@@ -354,7 +362,9 @@ const OrderPage = () => {
                 return (
                   <div key={item.id} className="bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden">
                     <div className="p-6">
-                      <div className="text-5xl mb-4 text-center">{item.image}</div>
+                      <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden border-4 border-orange-50 shadow-md">
+                        <img src={item.image} alt="Menu item" className="w-full h-full object-cover" />
+                      </div>
                       <div className="mb-4">
                         <h4 className="text-xl font-bold text-gray-800 mb-1">{item.name}</h4>
                         <p className="text-sm text-gray-500 mb-2">{item.category}</p>
@@ -422,7 +432,7 @@ const OrderPage = () => {
                   <div className="space-y-4 mb-6">
                     {cart.map(item => (
                       <div key={item.id} className="flex items-center gap-4 bg-orange-50 p-4 rounded-lg">
-                        <span className="text-3xl">{item.image}</span>
+                        <img src={item.image} alt="Cart item" className="w-12 h-12 rounded-xl object-cover border border-white shadow-sm" />
                         <div className="flex-1">
                           <h4 className="font-semibold text-gray-800">{item.name}</h4>
                           <p className="text-sm text-gray-500">{item.canteenName}</p>

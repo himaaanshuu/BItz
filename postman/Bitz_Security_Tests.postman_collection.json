@@ -1,0 +1,116 @@
+{
+  "info": {
+    "_postman_id": "b3e945c2-11a5-4b35-a681-37d3581564f8",
+    "name": "Bitz API Security Tests",
+    "description": "Automated security tests for the Bitz API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Security: SQL Injection Attempt on Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Should reject SQL injection attempt payload safely\", function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([400, 401, 403, 422, 500]);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"admin' OR '1'='1\",\n    \"password\": \"' OR '1'='1\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Security: Check Missing JWT Rejection",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Should return 401 Unauthorized when JWT is missing\", function () {",
+              "    pm.response.to.have.status(401);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/canteens",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "canteens"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Security: Invalid JWT Rejection",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Should return 401 or 403 when JWT is invalid\", function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer this.is.an.invalid.jwt.token",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/canteens",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "canteens"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

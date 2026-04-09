@@ -1,0 +1,31 @@
+services:
+  mongodb:
+    image: mongo:6
+    container_name: bitz_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+
+  backend:
+    build: 
+      context: ./bitz-backend
+      dockerfile: Dockerfile
+    container_name: bitz_backend
+    ports:
+      - "5001:5001"
+    env_file:
+      - ./bitz-backend/.env
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/bitz
+      - JWT_SECRET=production_secure_jwt_secret_min_32_chars_long
+      - CLIENT_ORIGIN=http://localhost:5173,http://localhost:3000
+      - PORT=5001
+      - NODE_ENV=production
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:

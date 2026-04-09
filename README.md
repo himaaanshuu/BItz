@@ -1,10 +1,10 @@
 
 # 🍽️ Bitez
 
-Bitez is a campus food ordering experience with a Vite + React frontend and an Express + MongoDB backend. It provides student and admin authentication (OTP + JWT), order management, and a developer-friendly structure split into frontend and backend packages.
+Bitez is a modern campus food ordering experience with a Vite + React frontend (Port 3000) and an Express + MongoDB backend. It features a complete UI/UX overhaul with glassmorphism aesthetics, dynamic "drop in" animations, and integrated student/admin authentication (OTP + Google OAuth). The project is developer-friendly, split into frontend and backend packages with full Docker containerization support!
 
-- Frontend: bitz-frontend (Vite + React)
-- Backend: bitz-backend (Express + MongoDB + JWT)
+- Frontend: bitz-frontend (Vite + React @ localhost:3000)
+- Backend: bitz-backend (Express + MongoDB + JWT / Dockerized)
 
 
 ## 📚 Table of contents
@@ -29,10 +29,13 @@ Bitez is a campus food ordering experience with a Vite + React frontend and an E
 
 ## ✨ Features
 
-- ✅ Student and admin authentication (OTP + JWT)
+- ✅ Student and admin authentication (Phone OTP + Google OAuth)
+- 🎨 Modern Glassmorphism UI (Custom `#FAFAFA` & Slate theme with Orange/Rose accents)
+- 🚀 Dynamic animations (Wait time burgers, Drop-In hero texts)
+- 🐳 Fully Dockerized Backend environment
 - 🧾 Admin seeding script for first-time setup
 - 🔁 REST API endpoints for auth and health checks
-- ⚡ Vite-powered React frontend for fast development
+- ⚡ Vite-powered React frontend for fast development (Port 3000)
 
 
 ## 🧰 Tech stack
@@ -144,7 +147,7 @@ npm install
 npm run dev
 ```
 
-The frontend is Vite-powered and will run on a local dev server (default: http://localhost:5173 unless configured otherwise). Update frontend environment variables if needed (e.g., API base URL).
+The frontend is Vite-powered and will run on a local dev server mapped specifically to port 3000 (`http://localhost:3000`). Update frontend environment variables if needed (`VITE_API_URL`, `VITE_GOOGLE_CLIENT_ID`).
 
 
 ## 📦 Root scripts

@@ -4,40 +4,49 @@ import { User, ShoppingBag, Clock, LogOut, ChevronDown, Settings, BarChart3, Men
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState('');
-  const [userType, setUserType] = useState(''); // 'student' or 'admin'
-  const navigate = useNavigate();
-
-  useEffect(() => {
+  
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
     const authToken = localStorage.getItem('bitezAuthToken');
-    const studentUser = localStorage.getItem('bitezUser');
-    const adminUser = localStorage.getItem('bitezAdmin');
     const roleCookie = document.cookie
       .split(';')
       .map((cookie) => cookie.trim())
       .find((cookie) => cookie.startsWith('bitezAuth='));
     const role = roleCookie ? roleCookie.split('=')[1] : '';
+    return !!(authToken && ((role === 'student' && localStorage.getItem('bitezUser')) || (role === 'admin' && localStorage.getItem('bitezAdmin'))));
+  });
 
-    if (authToken && role === 'student' && studentUser) {
-      setIsLoggedIn(true);
-      setUserType('student');
-      const userData = JSON.parse(studentUser);
-      setUserName(userData.name);
-      return;
+  const [userType, setUserType] = useState(() => {
+    const roleCookie = document.cookie
+      .split(';')
+      .map((cookie) => cookie.trim())
+      .find((cookie) => cookie.startsWith('bitezAuth='));
+    return roleCookie ? roleCookie.split('=')[1] : '';
+  });
+
+  const [userName, setUserName] = useState(() => {
+    const roleCookie = document.cookie
+      .split(';')
+      .map((cookie) => cookie.trim())
+      .find((cookie) => cookie.startsWith('bitezAuth='));
+    const role = roleCookie ? roleCookie.split('=')[1] : '';
+    
+    if (role === 'student') {
+      const studentUser = localStorage.getItem('bitezUser');
+      if (studentUser) return JSON.parse(studentUser).name || '';
+    } else if (role === 'admin') {
+      const adminUser = localStorage.getItem('bitezAdmin');
+      if (adminUser) {
+        const adminData = JSON.parse(adminUser);
+        return adminData.canteenName || adminData.name || 'Admin';
+      }
     }
+    return '';
+  });
 
-    if (authToken && role === 'admin' && adminUser) {
-      setIsLoggedIn(true);
-      setUserType('admin');
-      const adminData = JSON.parse(adminUser);
-      setUserName(adminData.canteenName || adminData.name || 'Admin');
-      return;
-    }
+  const navigate = useNavigate();
 
-    setIsLoggedIn(false);
-    setUserType('');
-    setUserName('');
+  useEffect(() => {
+    // Only used to re-validate if needed, but not to initialize state
   }, []);
 
   const handleLogout = () => {
@@ -84,51 +93,54 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 px-8 py-4">
+    <nav className="sticky top-0 z-50 glass-panel border-b border-white/20 px-8 py-4 w-full">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <div
           onClick={() => navigate('/')}
-          className="text-white font-bold text-3xl cursor-pointer"
+          className="font-black text-3xl cursor-pointer tracking-tight flex items-center gap-2 text-slate-800 hover:scale-105 transition-transform"
         >
-          BITEZ.
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-rose-500 flex justify-center items-center text-white text-xl">B</div>
+          ITEZ.
         </div>
 
         {/* Navigation Links */}
         <div className="flex items-center gap-8">
-          <a href="/" className="text-white font-medium hover:text-gray-200 transition cursor-pointer">
-            Home
+          <a onClick={() => navigate('/')} className="text-slate-600 font-semibold hover:text-orange-600 transition cursor-pointer">
+            Explore
           </a>
-          <a href="#about" className="text-white font-medium hover:text-gray-200 transition cursor-pointer">
+          <a onClick={() => navigate('/about')} className="text-slate-600 font-semibold hover:text-orange-600 transition cursor-pointer">
             About
           </a>
 
           {!isLoggedIn ? (
             <button
               onClick={handleLogin}
-              className="text-white font-medium hover:text-gray-200 transition cursor-pointer bg-transparent border-none"
+              className="bg-slate-900 text-white px-6 py-2.5 rounded-full font-bold hover:bg-slate-800 transition shadow-lg hover:shadow-xl hover:-translate-y-0.5"
             >
-              Login / Sign Up
+              Log In
             </button>
           ) : (
             /* Account Dropdown */
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 bg-white text-orange-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition"
+                className="flex items-center gap-2 bg-white text-slate-700 px-4 py-2 rounded-full font-bold border border-slate-200 hover:border-orange-500 hover:text-orange-600 shadow-sm transition group"
               >
-                <User size={20} />
+                <div className="bg-orange-100 p-1 rounded-full text-orange-600">
+                  <User size={16} />
+                </div>
                 <span>Account</span>
-                <ChevronDown size={16} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={14} className={`transition-transform text-slate-400 group-hover:text-orange-500 ${isDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Dropdown Menu */}
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-2xl overflow-hidden z-50 border border-gray-100">
+                <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl overflow-hidden z-50 border border-slate-100 animate-in fade-in slide-in-from-top-2 duration-200">
                   {/* User Info */}
-                  <div className="px-4 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 text-white">
-                    <p className="font-semibold truncate">{userName}</p>
-                    <p className="text-sm opacity-90 capitalize">{userType}</p>
+                  <div className="px-5 py-4 bg-slate-50 border-b border-slate-100">
+                    <p className="font-bold text-slate-800 truncate text-lg">{userName}</p>
+                    <p className="text-xs font-semibold text-orange-600 uppercase tracking-wider">{userType}</p>
                   </div>
 
                   {/* Menu Items for Student */}

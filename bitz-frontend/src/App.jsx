@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import './App.css';
 
 // Components
@@ -23,6 +24,52 @@ import Profile from './pages/Profile';
 import OrderHistory from './pages/OrderHistory';
 import CurrentOrder from './pages/CurrentOrder';
 import TrackOrder from './pages/TrackOrder';
+
+// 🔒 Student Protected Route - Also checks admin not logged in
+const ProtectedStudentRoute = ({ children }) => {
+  const authToken = localStorage.getItem('bitezAuthToken');
+  const hasStudentCookie = document.cookie
+    .split(';')
+    .some((cookie) => cookie.trim().startsWith('bitezAuth=student'));
+  const hasAdminCookie = document.cookie
+    .split(';')
+    .some((cookie) => cookie.trim().startsWith('bitezAuth=admin'));
+
+  // If admin is logged in, redirect to admin dashboard
+  if (hasAdminCookie) {
+    return <Navigate to="/admin-dashboard" />;
+  }
+
+  // If student not logged in, redirect to student login
+  if (!authToken || !hasStudentCookie) {
+    return <Navigate to="/student-login" />;
+  }
+
+  return children;
+};
+
+// 🔒 Admin Protected Route - Also checks student not logged in
+const ProtectedAdminRoute = ({ children }) => {
+  const authToken = localStorage.getItem('bitezAuthToken');
+  const hasStudentCookie = document.cookie
+    .split(';')
+    .some((cookie) => cookie.trim().startsWith('bitezAuth=student'));
+  const hasAdminCookie = document.cookie
+    .split(';')
+    .some((cookie) => cookie.trim().startsWith('bitezAuth=admin'));
+
+  // If student is logged in, redirect to student dashboard
+  if (hasStudentCookie) {
+    return <Navigate to="/student-dashboard" />;
+  }
+
+  // If admin not logged in, redirect to admin login
+  if (!authToken || !hasAdminCookie) {
+    return <Navigate to="/admin-login" />;
+  }
+
+  return children;
+};
 
 function App() {
   const [canteens, setCanteens] = useState([
@@ -90,156 +137,112 @@ function App() {
     ]);
   };
 
-  // 🔒 Student Protected Route - Also checks admin not logged in
-  const ProtectedStudentRoute = ({ children }) => {
-    const authToken = localStorage.getItem('bitezAuthToken');
-    const hasStudentCookie = document.cookie
-      .split(';')
-      .some((cookie) => cookie.trim().startsWith('bitezAuth=student'));
-    const hasAdminCookie = document.cookie
-      .split(';')
-      .some((cookie) => cookie.trim().startsWith('bitezAuth=admin'));
-
-    // If admin is logged in, redirect to admin dashboard
-    if (hasAdminCookie) {
-      return <Navigate to="/admin-dashboard" />;
-    }
-
-    // If student not logged in, redirect to student login
-    if (!authToken || !hasStudentCookie) {
-      return <Navigate to="/student-login" />;
-    }
-
-    return children;
-  };
-
-  // 🔒 Admin Protected Route - Also checks student not logged in
-  const ProtectedAdminRoute = ({ children }) => {
-    const authToken = localStorage.getItem('bitezAuthToken');
-    const hasStudentCookie = document.cookie
-      .split(';')
-      .some((cookie) => cookie.trim().startsWith('bitezAuth=student'));
-    const hasAdminCookie = document.cookie
-      .split(';')
-      .some((cookie) => cookie.trim().startsWith('bitezAuth=admin'));
-
-    // If student is logged in, redirect to student dashboard
-    if (hasStudentCookie) {
-      return <Navigate to="/student-dashboard" />;
-    }
-
-    // If admin not logged in, redirect to admin login
-    if (!authToken || !hasAdminCookie) {
-      return <Navigate to="/admin-login" />;
-    }
-
-    return children;
-  };
-
   return (
-    <Router>
-      <div className="min-h-screen">
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/auth" element={<AuthPortal />} />
-          <Route path="/privacy" element={<Privacy />} />
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || 'dummy-client-id.apps.googleusercontent.com'}>
+      <Router>
+        <div className="min-h-screen">
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/auth" element={<AuthPortal />} />
+            <Route path="/privacy" element={<Privacy />} />
 
-          {/* Student Routes */}
-          <Route path="/student-login" element={<StudentLogin />} />
+            {/* Student Routes */}
+            <Route path="/student-login" element={<StudentLogin />} />
 
-          <Route
-            path="/student-dashboard"
-            element={
-              <ProtectedStudentRoute>
-                <StudentDashboard canteens={canteens} />
-              </ProtectedStudentRoute>
-            }
-          />
+            <Route
+              path="/student-dashboard"
+              element={
+                <ProtectedStudentRoute>
+                  <StudentDashboard canteens={canteens} />
+                </ProtectedStudentRoute>
+              }
+            />
 
-          <Route
-            path="/order"
-            element={
-              <ProtectedStudentRoute>
-                <OrderPage />
-              </ProtectedStudentRoute>
-            }
-          />
+            <Route
+              path="/order"
+              element={
+                <ProtectedStudentRoute>
+                  <OrderPage />
+                </ProtectedStudentRoute>
+              }
+            />
 
-          <Route
-            path="/profile"
-            element={
-              <ProtectedStudentRoute>
-                <Profile />
-              </ProtectedStudentRoute>
-            }
-          />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedStudentRoute>
+                  <Profile />
+                </ProtectedStudentRoute>
+              }
+            />
 
-          <Route
-            path="/order-history"
-            element={
-              <ProtectedStudentRoute>
-                <OrderHistory />
-              </ProtectedStudentRoute>
-            }
-          />
+            <Route
+              path="/order-history"
+              element={
+                <ProtectedStudentRoute>
+                  <OrderHistory />
+                </ProtectedStudentRoute>
+              }
+            />
 
-          <Route
-            path="/current-order"
-            element={
-              <ProtectedStudentRoute>
-                <CurrentOrder />
-              </ProtectedStudentRoute>
-            }
-          />
+            <Route
+              path="/current-order"
+              element={
+                <ProtectedStudentRoute>
+                  <CurrentOrder />
+                </ProtectedStudentRoute>
+              }
+            />
 
-          <Route
-            path="/track"
-            element={
-              <ProtectedStudentRoute>
-                <TrackOrder />
-              </ProtectedStudentRoute>
-            }
-          />
+            <Route
+              path="/track"
+              element={
+                <ProtectedStudentRoute>
+                  <TrackOrder />
+                </ProtectedStudentRoute>
+              }
+            />
 
-          {/* Admin Routes */}
-          <Route path="/admin-login" element={<AdminLogin />} />
+            {/* Admin Routes */}
+            <Route path="/admin-login" element={<AdminLogin />} />
 
-          <Route
-            path="/admin-dashboard"
-            element={
-              <ProtectedAdminRoute>
-                <AdminDashboard addCanteen={addCanteen} />
-              </ProtectedAdminRoute>
-            }
-          />
+            <Route
+              path="/admin-dashboard"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminDashboard addCanteen={addCanteen} />
+                </ProtectedAdminRoute>
+              }
+            />
 
-          <Route
-            path="/admin-settings"
-            element={
-              <ProtectedAdminRoute>
-                <AdminSettings />
-              </ProtectedAdminRoute>
-            }
-          />
+            <Route
+              path="/admin-settings"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminSettings />
+                </ProtectedAdminRoute>
+              }
+            />
 
-          <Route
-            path="/admin-analytics"
-            element={
-              <ProtectedAdminRoute>
-                <AdminAnalytics />
-              </ProtectedAdminRoute>
-            }
-          />
+            <Route
+              path="/admin-analytics"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminAnalytics />
+                </ProtectedAdminRoute>
+              }
+            />
 
-          {/* Fallback Route */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+            {/* Fallback Route */}
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
 
-        <Footer />
-      </div>
-    </Router>
+          <Footer />
+        </div>
+      </Router>
+    </GoogleOAuthProvider>
   );
 }
 
