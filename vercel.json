@@ -1,7 +1,7 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "bitz-frontend/dist",
-  "installCommand": "npm install --prefix bitz-frontend",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
   "framework": "vite",
   "rewrites": [
     { "source": "/((?!assets/).*)", "destination": "/index.html" }
