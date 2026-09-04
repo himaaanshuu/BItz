@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AnimatePresence } from 'framer-motion';
@@ -179,71 +179,6 @@ function AnimatedRoutes() {
 }
 
 function App() {
-  const [canteens, setCanteens] = useState([
-    {
-      id: 1,
-      name: 'Main Canteen',
-      location: 'Ground Floor, Building A',
-      queue: 8,
-      prepTime: 15,
-      menu: [
-        { id: 101, name: 'Veg Burger', price: 60, category: 'Fast Food', available: true },
-        { id: 102, name: 'Pizza Slice', price: 80, category: 'Fast Food', available: true },
-        { id: 103, name: 'French Fries', price: 40, category: 'Snacks', available: true },
-        { id: 104, name: 'Cold Coffee', price: 50, category: 'Beverages', available: true }
-      ]
-    },
-    {
-      id: 2,
-      name: 'South Canteen',
-      location: '2nd Floor, Building B',
-      queue: 3,
-      prepTime: 12,
-      menu: [
-        { id: 201, name: 'Masala Dosa', price: 70, category: 'South Indian', available: true },
-        { id: 202, name: 'Idli Sambhar', price: 50, category: 'South Indian', available: true },
-        { id: 203, name: 'Filter Coffee', price: 25, category: 'Beverages', available: true }
-      ]
-    },
-    {
-      id: 3,
-      name: 'North Canteen',
-      location: '1st Floor, Building C',
-      queue: 5,
-      prepTime: 10,
-      menu: [
-        { id: 301, name: 'Chole Bhature', price: 80, category: 'North Indian', available: true },
-        { id: 302, name: 'Paneer Paratha', price: 60, category: 'North Indian', available: true },
-        { id: 303, name: 'Samosa', price: 20, category: 'Snacks', available: true }
-      ]
-    },
-    {
-      id: 4,
-      name: 'Juice Corner',
-      location: 'Near Library',
-      queue: 2,
-      prepTime: 5,
-      menu: [
-        { id: 401, name: 'Fresh Orange Juice', price: 40, category: 'Fresh Juice', available: true },
-        { id: 402, name: 'Watermelon Juice', price: 35, category: 'Fresh Juice', available: true },
-        { id: 403, name: 'Mixed Fruit Smoothie', price: 60, category: 'Smoothies', available: true }
-      ]
-    }
-  ]);
-
-  const addCanteen = (newCanteen) => {
-    setCanteens(prev => [
-      ...prev,
-      {
-        ...newCanteen,
-        id: Date.now(),
-        menu: newCanteen.menu || [],
-        queue: newCanteen.queue || 0,
-        prepTime: newCanteen.prepTime || 0
-      }
-    ]);
-  };
-
   return (
     <ErrorBoundary>
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || 'dummy-client-id.apps.googleusercontent.com'}>

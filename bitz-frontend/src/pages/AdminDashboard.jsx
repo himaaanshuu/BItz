@@ -50,21 +50,9 @@ const AdminDashboard = () => {
     };
     loadCanteen();
 
-    const mockOrders = [
-      { id: 1, tokenNumber: 456, customerName: 'Rahul Sharma', items: [{ name: 'Veg Burger', quantity: 1, price: 60 }, { name: 'Cold Coffee', quantity: 2, price: 50 }], total: 160, status: 'pending', paymentMethod: 'Cash', time: '2:30 PM' },
-      { id: 2, tokenNumber: 457, customerName: 'Priya Singh', items: [{ name: 'Paneer Tikka Pizza', quantity: 2, price: 120 }, { name: 'French Fries', quantity: 1, price: 45 }], total: 285, status: 'preparing', paymentMethod: 'UPI', time: '2:35 PM' },
-      { id: 3, tokenNumber: 458, customerName: 'Amit Kumar', items: [{ name: 'Samosa (2 pcs)', quantity: 2, price: 25 }, { name: 'Masala Chai', quantity: 2, price: 20 }], total: 90, status: 'ready', paymentMethod: 'Cash', time: '2:40 PM' },
-      { id: 4, tokenNumber: 459, customerName: 'Sneha Patel', items: [{ name: 'Veg Fried Rice', quantity: 1, price: 70 }, { name: 'Gulab Jamun (2 pcs)', quantity: 1, price: 35 }], total: 105, status: 'completed', paymentMethod: 'UPI', time: '2:15 PM' },
-    ];
-    setOrders(mockOrders);
-    setStats({
-      pending: mockOrders.filter(o => o.status === 'pending').length,
-      preparing: mockOrders.filter(o => o.status === 'preparing').length,
-      ready: mockOrders.filter(o => o.status === 'ready').length,
-      completed: mockOrders.filter(o => o.status === 'completed').length,
-      todayRevenue: mockOrders.reduce((sum, o) => sum + o.total, 0),
-      totalOrders: mockOrders.length,
-    });
+    // TODO: Add a backend admin orders endpoint to fetch real orders
+    setOrders([]);
+    setStats({ pending: 0, preparing: 0, ready: 0, completed: 0, todayRevenue: 0, totalOrders: 0 });
   }, [navigate]);
 
   const handleCanteenChange = (field, value) => setCanteenForm(prev => ({ ...prev, [field]: value }));

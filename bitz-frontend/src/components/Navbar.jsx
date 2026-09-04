@@ -49,6 +49,33 @@ const Navbar = () => {
 
   const navigate = useNavigate();
 
+  const refreshAuthState = () => {
+    const authToken = localStorage.getItem('bitezAuthToken');
+    const roleCookie = document.cookie
+      .split(';')
+      .map((c) => c.trim())
+      .find((c) => c.startsWith('bitezAuth='));
+    const role = roleCookie ? roleCookie.split('=')[1] : '';
+    setIsLoggedIn(!!(authToken && ((role === 'student' && localStorage.getItem('bitezUser')) || (role === 'admin' && localStorage.getItem('bitezAdmin')))));
+    setUserType(role);
+    if (role === 'student') {
+      const u = localStorage.getItem('bitezUser');
+      setUserName(u ? (JSON.parse(u).name || '') : '');
+    } else if (role === 'admin') {
+      const a = localStorage.getItem('bitezAdmin');
+      if (a) { const d = JSON.parse(a); setUserName(d.canteenName || d.name || 'Admin'); }
+      else setUserName('');
+    } else {
+      setUserName('');
+    }
+  };
+
+  useEffect(() => {
+    const handleStorage = () => refreshAuthState();
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => {
       if (!ticking.current) {

@@ -4,10 +4,12 @@ import { motion } from 'framer-motion';
 import { ShoppingBag, Clock, CheckCircle, XCircle, Package, MapPin } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import ScrollReveal from '../components/ScrollReveal';
+import { api } from '../services/api';
 
 const OrderHistory = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('bitezAuthToken');
@@ -19,18 +21,19 @@ const OrderHistory = () => {
       return;
     }
 
-    const storedOrders = localStorage.getItem('bitezOrderHistory');
-    if (storedOrders) {
-      setOrders(JSON.parse(storedOrders));
-    } else {
-      const mockOrders = [
-        { id: 1, date: '2024-01-18', time: '12:30 PM', canteen: 'Main Cafeteria', items: [{ name: 'Chicken Burger', quantity: 2, price: 120 }, { name: 'French Fries', quantity: 1, price: 60 }], total: 300, status: 'completed' },
-        { id: 2, date: '2024-01-17', time: '2:15 PM', canteen: 'South Canteen', items: [{ name: 'Masala Dosa', quantity: 1, price: 70 }, { name: 'Filter Coffee', quantity: 1, price: 25 }], total: 95, status: 'completed' },
-        { id: 3, date: '2024-01-16', time: '1:00 PM', canteen: 'Quick Bites', items: [{ name: 'Samosa', quantity: 3, price: 20 }, { name: 'Coffee', quantity: 2, price: 30 }], total: 120, status: 'cancelled' },
-      ];
-      setOrders(mockOrders);
-      localStorage.setItem('bitezOrderHistory', JSON.stringify(mockOrders));
-    }
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        const response = await api.getOrdersMe();
+        setOrders(response.orders || []);
+      } catch (err) {
+        console.error('Failed to load order history:', err);
+        setOrders([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrders();
   }, [navigate]);
 
   const getStatusColor = (status) => {
@@ -74,7 +77,12 @@ const OrderHistory = () => {
           </div>
         </ScrollReveal>
 
-        {orders.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 mx-auto border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-slate-500 font-bold">Loading your orders...</p>
+          </div>
+        ) : orders.length === 0 ? (
           <ScrollReveal variant="scaleUp">
             <div className="glass-panel rounded-[2.5rem] p-16 text-center border border-white shadow-xl">
               <div className="w-24 h-24 mx-auto mb-6 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center">

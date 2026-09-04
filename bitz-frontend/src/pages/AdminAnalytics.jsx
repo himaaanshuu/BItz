@@ -12,48 +12,21 @@ import {
   LogOut,
   BarChart2
 } from 'lucide-react';
+import { api } from '../services/api';
 
 const AdminAnalytics = () => {
   const navigate = useNavigate();
   const [showAccountMenu, setShowAccountMenu] = useState(false);
-  const [canteenData, setCanteenData] = useState(() => {
-    const storedAdmin = localStorage.getItem('bitezAdmin');
-    return storedAdmin ? JSON.parse(storedAdmin) : null;
+  const [canteenData, setCanteenData] = useState(null);
+  const [menuItems, setMenuItems] = useState([]);
+  const [stats, setStats] = useState({
+    totalRevenue: 0,
+    totalOrders: 0,
+    avgOrderValue: 0,
+    popularItems: []
   });
-
-  const [menuItems, setMenuItems] = useState(() => {
-    const storedMenu = localStorage.getItem('bitezMenu');
-    return storedMenu ? JSON.parse(storedMenu) : [];
-  });
-
-  const [stats, setStats] = useState(() => {
-    const storedMenu = localStorage.getItem('bitezMenu');
-    if (storedMenu) {
-      const items = JSON.parse(storedMenu);
-      const totalRevenue = items.reduce(
-        (sum, item) => sum + item.price * (Math.floor(Math.random() * 20) + 5),
-        0
-      );
-      const totalOrders = Math.floor(totalRevenue / 150);
-      const avgOrderValue = totalOrders ? Math.round(totalRevenue / totalOrders) : 0;
-      const itemsWithSales = items
-        .map(item => ({ ...item, sales: Math.floor(Math.random() * 50) + 10 }))
-        .sort((a, b) => b.sales - a.sales);
-
-      return {
-        totalRevenue: Math.round(totalRevenue),
-        totalOrders,
-        avgOrderValue,
-        popularItems: itemsWithSales.slice(0, 5)
-      };
-    }
-    return {
-      totalRevenue: 0,
-      totalOrders: 0,
-      avgOrderValue: 0,
-      popularItems: []
-    };
-  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const adminToken = localStorage.getItem('bitezAuthToken');
@@ -64,6 +37,33 @@ const AdminAnalytics = () => {
       navigate('/admin-login');
       return;
     }
+
+    const loadAnalytics = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        const response = await api.getCanteen();
+        const canteen = response.canteen;
+        setCanteenData(canteen);
+        const items = canteen?.menuItems || [];
+        setMenuItems(items);
+
+        const totalRevenue = items.reduce((sum, item) => sum + (item.price || 0) * (item.salesCount || 0), 0);
+        const totalOrders = items.reduce((sum, item) => sum + (item.salesCount || 0), 0);
+        const avgOrderValue = totalOrders ? Math.round(totalRevenue / totalOrders) : 0;
+        const popularItems = items
+          .map(item => ({ ...item, sales: item.salesCount || 0 }))
+          .sort((a, b) => b.sales - a.sales)
+          .slice(0, 5);
+
+        setStats({ totalRevenue, totalOrders, avgOrderValue, popularItems });
+      } catch (err) {
+        setError(err.message || 'Failed to load analytics data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAnalytics();
   }, [navigate]);
 
   const handleLogout = () => {
@@ -140,6 +140,18 @@ const AdminAnalytics = () => {
       {/* CONTENT */}
       <div className="max-w-[1400px] mx-auto p-8 relative z-10">
 
+        {loading ? (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 mx-auto border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-slate-500 font-bold">Loading analytics...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-16 bg-white rounded-3xl border border-rose-200">
+            <p className="text-rose-600 font-bold text-lg mb-2">Error loading analytics</p>
+            <p className="text-slate-500">{error}</p>
+          </div>
+        ) : (
+        <>
         {/* Stats */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <StatCard icon={DollarSign} label="Total Revenue" value={`₹${stats.totalRevenue}`} color="text-emerald-500" bg="bg-emerald-50" />
@@ -217,6 +229,8 @@ const AdminAnalytics = () => {
             </div>
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );

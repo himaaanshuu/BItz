@@ -12,6 +12,7 @@ const AdminSettings = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -45,9 +46,10 @@ const AdminSettings = () => {
     e.preventDefault();
     setMessage(''); setError(''); setIsSaving(true);
     try {
+      await api.updateCanteen(canteenData);
       localStorage.setItem('bitezAdmin', JSON.stringify(canteenData));
       setMessage('Canteen profile updated successfully.');
-    } catch (err) { setError(err.message); } finally { setIsSaving(false); }
+    } catch (err) { setError(err.message || 'Failed to update canteen profile.'); } finally { setIsSaving(false); }
   };
 
   const handleUpdatePassword = async (e) => {
@@ -240,10 +242,16 @@ const AdminSettings = () => {
                       <label className="flex items-center text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 gap-1.5">
                         <Lock size={12} /> Confirm New Password
                       </label>
-                      <input type="password" value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                        placeholder="Confirm new password"
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all" />
+                      <div className="relative">
+                        <input type={showConfirmPassword ? 'text' : 'password'} value={passwordData.confirmPassword}
+                          onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                          placeholder="Confirm new password"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all pr-12" />
+                        <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                          {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
                     </ScrollReveal>
 
                     <ScrollReveal variant="fadeUp" delay={0.25}>

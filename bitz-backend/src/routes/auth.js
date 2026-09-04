@@ -255,11 +255,7 @@ router.post('/student/google', async (req, res) => {
       });
       payload = ticket.getPayload();
     } catch (e) {
-      // Decode JWT without verify if CLIENT_ID is not configured and token is simulated
-      payload = jwt.decode(token);
-      if (!payload || !payload.email) {
-        return res.status(401).json({ message: 'Invalid Google token.' });
-      }
+      return res.status(401).json({ message: 'Invalid Google token.' });
     }
 
     const { email, name } = payload;

@@ -27,6 +27,7 @@ if (process.env.NODE_ENV === 'production' && process.env.JWT_SECRET.length < 32)
 }
 
 const app = express();
+app.set('trust proxy', 1);
 const port = process.env.PORT || 5001;
 const clientOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
   .split(",")
@@ -69,6 +70,15 @@ app.use("/api/orders", orderRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
+
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ message: 'Internal server error' });
 });
 
 connectDB(process.env.MONGODB_URI)

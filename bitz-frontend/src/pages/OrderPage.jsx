@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Component } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Plus, Minus, X, ChevronRight, CreditCard, Wallet, User, LogOut, Package, Clock } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X, ChevronRight, CreditCard, Wallet, User, LogOut, Package, Clock, MapPin } from 'lucide-react';
 import { api } from '../services/api';
 import { CardPaymentModal } from '../components/CardPaymentModal';
 
@@ -261,7 +261,7 @@ const OrderPageContent = () => {
 
                   <button
                     onClick={() => {
-                      navigate('/order');
+                      navigate('/student-dashboard');
                       setShowUserMenu(false);
                     }}
                     className="w-full text-left px-4 py-3 hover:bg-orange-50 text-gray-800 flex items-center gap-3"

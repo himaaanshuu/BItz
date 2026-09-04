@@ -115,10 +115,15 @@ export async function stripeWebhook(req, res) {
     const paymentIntent = event.data.object;
     const orderId = paymentIntent.metadata?.orderId;
     if (orderId) {
-      await Order.updateOne(
-        { _id: orderId },
-        { $set: { paymentStatus: 'paid' } }
-      );
+      try {
+        await Order.updateOne(
+          { _id: orderId },
+          { $set: { paymentStatus: 'paid' } }
+        );
+      } catch (err) {
+        console.error('Webhook DB update failed:', err);
+        return res.status(500).json({ message: 'Webhook processing failed' });
+      }
     }
   }
 

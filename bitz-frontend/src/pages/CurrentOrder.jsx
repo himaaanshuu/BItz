@@ -4,11 +4,13 @@ import { motion } from 'framer-motion';
 import { Clock, CheckCircle, Package, MapPin, Phone, ChefHat, Check, PartyPopper, ShoppingBag } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import ScrollReveal from '../components/ScrollReveal';
+import { api } from '../services/api';
 
 const CurrentOrder = () => {
   const navigate = useNavigate();
   const [currentOrder, setCurrentOrder] = useState(null);
   const [orderStatus, setOrderStatus] = useState('preparing');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('bitezAuthToken');
@@ -20,19 +22,34 @@ const CurrentOrder = () => {
       return;
     }
 
-    const storedOrder = localStorage.getItem('bitezCurrentOrder');
-    if (storedOrder) {
-      setCurrentOrder(JSON.parse(storedOrder));
-    } else {
-      const mockOrder = {
-        id: 4, date: '2024-01-19', time: '1:45 PM', canteen: 'Main Cafeteria',
-        location: 'Ground Floor, Building A', phone: '+91 98765 43210',
-        items: [{ name: 'Veg Burger', quantity: 1, price: 60 }, { name: 'Cold Coffee', quantity: 1, price: 50 }],
-        total: 110, estimatedTime: 12, queueNumber: 3
-      };
-      setCurrentOrder(mockOrder);
-      localStorage.setItem('bitezCurrentOrder', JSON.stringify(mockOrder));
-    }
+    const fetchLatestOrder = async () => {
+      try {
+        setLoading(true);
+        const response = await api.getOrdersMe();
+        const orders = response.orders || [];
+        const activeOrder = orders.find(o => o.status !== 'completed' && o.status !== 'cancelled');
+        if (activeOrder) {
+          setCurrentOrder({
+            id: activeOrder.tokenNumber || activeOrder._id,
+            date: new Date(activeOrder.createdAt || Date.now()).toLocaleDateString(),
+            time: new Date(activeOrder.createdAt || Date.now()).toLocaleTimeString(),
+            canteen: activeOrder.canteenName || 'Canteen',
+            location: activeOrder.deliveryAddress || 'Campus',
+            phone: '',
+            items: activeOrder.items || [],
+            total: activeOrder.total || 0,
+            estimatedTime: 15,
+            queueNumber: 1
+          });
+          setOrderStatus(activeOrder.status || 'preparing');
+        }
+      } catch (err) {
+        console.error('Failed to load current order:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLatestOrder();
   }, [navigate]);
 
   const getProgressPercentage = () => {
@@ -68,6 +85,12 @@ const CurrentOrder = () => {
         </ScrollReveal>
 
         {!currentOrder ? (
+          loading ? (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 mx-auto border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-slate-500 font-bold">Loading your order...</p>
+            </div>
+          ) : (
           <ScrollReveal variant="scaleUp">
             <div className="glass-panel rounded-[2.5rem] p-16 text-center border border-white shadow-xl">
               <div className="w-24 h-24 mx-auto mb-6 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center">
@@ -85,6 +108,7 @@ const CurrentOrder = () => {
               </motion.button>
             </div>
           </ScrollReveal>
+          )
         ) : (
           <div className="space-y-6">
             {/* Order Status Card */}
@@ -228,30 +252,6 @@ const CurrentOrder = () => {
                 </motion.div>
               </ScrollReveal>
             </div>
-
-            {/* Demo Status Buttons */}
-            <ScrollReveal variant="fadeUp" delay={0.3}>
-              <div className="glass-panel rounded-2xl p-4 border border-dashed border-slate-300 shadow-sm">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2">Developer Tools</h3>
-                <div className="flex flex-wrap gap-3 justify-center">
-                  {[
-                    { status: 'preparing', label: 'Set Preparing', color: 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200' },
-                    { status: 'ready', label: 'Set Ready', color: 'bg-orange-100 hover:bg-orange-200 text-orange-700 border-orange-200' },
-                    { status: 'completed', label: 'Set Completed', color: 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700 border-emerald-200' },
-                  ].map((btn) => (
-                    <motion.button
-                      key={btn.status}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setOrderStatus(btn.status)}
-                      className={`${btn.color} px-4 py-2 rounded-xl font-bold text-sm transition-colors border`}
-                    >
-                      {btn.label}
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
-            </ScrollReveal>
           </div>
         )}
       </div>

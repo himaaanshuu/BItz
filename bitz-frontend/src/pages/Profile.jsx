@@ -31,10 +31,13 @@ const Profile = () => {
     }
   }, [navigate]);
 
+  const [message, setMessage] = useState('');
+
   const handleSave = () => {
     localStorage.setItem('bitezUser', JSON.stringify(userData));
     setIsEditing(false);
-    alert('Profile updated successfully!');
+    setMessage('Profile updated successfully!');
+    setTimeout(() => setMessage(''), 3000);
   };
 
   const fields = [
@@ -58,6 +61,17 @@ const Profile = () => {
       />
 
       <Navbar />
+
+      {message && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-6 py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg"
+        >
+          {message}
+        </motion.div>
+      )}
 
       <div className="max-w-[1000px] mx-auto px-6 py-12 relative z-10">
         <ScrollReveal variant="fadeUp">

@@ -143,6 +143,20 @@ export const api = {
     });
     return handleResponse(response);
   },
+  getOrdersAdminAll: async () => {
+    const response = await fetch(`${API_URL}/orders/admin/all`, {
+      headers: { ...withAuth() },
+    });
+    return handleResponse(response);
+  },
+  updateOrderStatus: async (orderId, status) => {
+    const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...withAuth() },
+      body: JSON.stringify({ status }),
+    });
+    return handleResponse(response);
+  },
   changePasswordAdmin: async (payload) => {
     const response = await fetch(`${API_URL}/auth/change-password`, {
       method: 'POST',

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, ChevronRight, ShieldCheck, Zap, MapPin, CreditCard } from 'lucide-react';
 import { api } from '../services/api';
