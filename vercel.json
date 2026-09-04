@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd bitz-frontend && npm install && npm run build",
+  "outputDirectory": "bitz-frontend/dist",
+  "installCommand": "npm install --prefix bitz-frontend",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+  ]
+}
