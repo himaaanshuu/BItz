@@ -8,6 +8,7 @@
     "start": "node src/index.js",
     "seed:admin": "node src/seed/admin.js",
     "seed:student": "node src/seed/student.js",
+    "seed:all": "node src/seed/seedAll.js",
     "seed": "npm run seed:admin && npm run seed:student"
   },
   "dependencies": {

@@ -1,270 +1,225 @@
 
-# 🍽️ Bitez
+# Bitez
 
-Bitez is a modern campus food ordering experience with a Vite + React frontend (Port 3000) and an Express + MongoDB backend. It features a complete UI/UX overhaul with glassmorphism aesthetics, dynamic "drop in" animations, and integrated student/admin authentication (OTP + Google OAuth). The project is developer-friendly, split into frontend and backend packages with full Docker containerization support!
+A modern campus food ordering platform that lets students skip the queue and order ahead. Built with Vite + React frontend and Express + MongoDB backend.
 
-- Frontend: bitz-frontend (Vite + React @ localhost:3000)
-- Backend: bitz-backend (Express + MongoDB + JWT / Dockerized)
+---
 
+## Overview
 
-## 📚 Table of contents
+Bitez connects campus canteens with students through a seamless digital ordering experience. Students can browse menus, place orders, track preparation in real-time, and pick up their food when it is ready. Canteen admins get a dashboard to manage menus, track orders, and monitor analytics.
 
-- [✨ Features](#-features)
-- [🧰 Tech stack](#-tech-stack)
-- [⚙️ Prerequisites](#-prerequisites)
-- [🚀 Quick start (recommended)](#-quick-start-recommended)
-- [🔒 Backend setup (MongoDB + JWT)](#-backend-setup-mongodb--jwt)
-  - [🧩 Environment variables](#-environment-variables)
-  - [👤 Seed admin (required)](#-seed-admin-required)
-  - [▶️ Run the API](#-run-the-api)
-  - [📡 API endpoints](#-api-endpoints)
-- [💻 Frontend setup](#-frontend-setup)
-- [📦 Root scripts](#-root-scripts)
-- [🛠️ Development tips & troubleshooting](#-development-tips--troubleshooting)
-- [🚧 Currently working on / Improvements](#-currently-working-on--improvements)
-- [🐞 Current issues / Known bugs](#-current-issues--known-bugs)
-- [🤝 Contributing](#-contributing)
-- [📄 License & contact](#-license--contact)
+---
 
+## Features
 
-## ✨ Features
+- **Student Authentication** - Phone OTP and Google OAuth login
+- **Admin Dashboard** - Real-time order management, menu CRUD, analytics
+- **Live Order Tracking** - Students see preparation status in real-time
+- **Menu Management** - Canteen admins add, edit, toggle availability of items
+- **Responsive Design** - Works on desktop, tablet, and mobile
+- **Scroll Animations** - Framer Motion powered page transitions and reveals
+- **Docker Support** - Full containerization for local development
 
-- ✅ Student and admin authentication (Phone OTP + Google OAuth)
-- 🎨 Modern Glassmorphism UI (Custom `#FAFAFA` & Slate theme with Orange/Rose accents)
-- 🚀 Dynamic animations (Wait time burgers, Drop-In hero texts)
-- 🐳 Fully Dockerized Backend environment
-- 🧾 Admin seeding script for first-time setup
-- 🔁 REST API endpoints for auth and health checks
-- ⚡ Vite-powered React frontend for fast development (Port 3000)
+---
 
+## Tech Stack
 
-## 🧰 Tech stack
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18, Vite, Tailwind CSS, Framer Motion |
+| Backend | Node.js, Express, Mongoose |
+| Database | MongoDB (local or Atlas) |
+| Auth | JWT, OTP, Google OAuth |
+| Deployment | Vercel (frontend), Railway/Render (backend) |
 
-- Frontend: React, Vite
-- Backend: Node.js, Express
-- Database: MongoDB
-- Auth: JWT + OTP workflows
-- Dev tools: npm
+---
 
+## Project Structure
 
-## ⚙️ Prerequisites
+```
+Bitez/
+  bitz-frontend/          # Vite + React SPA
+    src/
+      components/         # Navbar, Footer, ScrollReveal, AnimatedBanner
+      pages/              # Home, About, Auth, Dashboard, Profile, etc.
+      services/           # API client
+    public/               # Static assets (logo, hero image)
+    vercel.json           # Vercel SPA rewrite rules
 
-- Node.js (16+ recommended)
+  bitz-backend/           # Express + MongoDB API
+    src/
+      models/             # User, Canteen, Order, Otp
+      routes/             # auth, canteens, orders, payments
+      seed/               # Demo data seeding scripts
+      middleware/          # Auth, role, rate limiting
+    Dockerfile
+```
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js 18+
 - npm
-- MongoDB instance (local or cloud e.g., MongoDB Atlas)
+- MongoDB (local or Atlas)
 
-
-
-## 🚀 Quick start (recommended)
-
-From the repository root you can run both apps locally (see root scripts below):
+### 1. Clone and Install
 
 ```bash
-# install dependencies for frontend and backend
-npm install
+git clone https://github.com/himaaanshuu/Bitez.git
+cd Bitez
 
-# start both (see package.json scripts)
-npm run dev
+# Install backend dependencies
+cd bitz-backend && npm install
+
+# Install frontend dependencies
+cd ../bitz-frontend && npm install
 ```
 
+### 2. Configure Environment
 
-## 🔒 Backend setup (MongoDB + JWT)
-
-1. Copy environment variables:
-
-   - Create `bitz-backend/.env` from `bitz-backend/.env.example`
-   - Fill in the required values (example below)
-
-2. Install dependencies and run (from repo root or backend folder):
-
-```bash
-cd bitz-backend
-npm install
-```
-
-3. Seed the admin (required for admin login):
-
-```bash
-npm run seed:admin
-```
-
-4. Run the API:
-
-```bash
-npm run dev
-# or, to run from root if scripts forward:
-npm run dev --workspace=bitz-backend
-```
-
-### 🧩 Environment variables
-
-Example `bitz-backend/.env` (adjust to what's in your `.env.example`):
+Create `bitz-backend/.env`:
 
 ```env
 PORT=5001
-MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/bitz?retryWrites=true&w=majority
-JWT_SECRET=your_jwt_secret_at_least_32_chars_in_production
-CLIENT_ORIGIN=http://localhost:5173
-
-# Optional: Twilio (OTP), UPI_VPA (UPI), STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET (card payments)
-# See bitz-backend/.env.example for full list.
+MONGODB_URI=mongodb://localhost:27017/bitz
+JWT_SECRET=your_secret_key_at_least_32_chars
+CLIENT_ORIGIN=http://localhost:3000
 ```
 
-Keep secrets out of source control. Use a secrets manager or environment-specific configuration for production.
-
-### 👤 Seed admin (required)
-
-If your backend includes an admin seeder script, run:
+### 3. Seed Demo Data
 
 ```bash
-npm run seed:admin
+cd bitz-backend
+npm run seed:all
 ```
 
-This will create the initial admin account (used to log in as admin). Check the seeder output for the seeded admin email/credentials or OTP flow.
+This creates:
+- Admin: `admin@bitez.com` / `Admin@123!`
+- Student: `student@bitez.com` / `Student@123!`
+- Canteen with 15 menu items
 
-### 📡 API endpoints
-
-Common auth and health endpoints (adjust if your implementation differs):
-
-- POST /api/auth/student/register
-- POST /api/auth/student/request-otp
-- POST /api/auth/student/login
-- POST /api/auth/admin/request-otp
-- POST /api/auth/admin/login
-- GET  /api/auth/me
-- GET  /api/health
-
-Add further API docs or a Postman collection as the project grows.
-
-
-## 💻 Frontend setup
-
-From project root or the frontend folder:
+### 4. Start Development
 
 ```bash
-cd bitz-frontend
-npm install
+# From root
 npm run dev
 ```
 
-The frontend is Vite-powered and will run on a local dev server mapped specifically to port 3000 (`http://localhost:3000`). Update frontend environment variables if needed (`VITE_API_URL`, `VITE_GOOGLE_CLIENT_ID`).
+Frontend runs on `http://localhost:3000`, backend on `http://localhost:5001`.
 
+---
 
-## 📦 Root scripts
+## API Endpoints
 
-The root package.json exposes convenience scripts that forward to the frontend/backend:
+### Auth
 
-```bash
-# start dev environment (frontend + backend as configured)
-npm run dev
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/student/register` | Register student |
+| POST | `/api/auth/student/request-otp` | Request OTP (phone) |
+| POST | `/api/auth/student/login` | Login with OTP |
+| POST | `/api/auth/student/google` | Google OAuth login |
+| POST | `/api/auth/admin/request-otp` | Request admin OTP |
+| POST | `/api/auth/admin/login` | Admin login (email + password + OTP) |
+| POST | `/api/auth/change-password` | Change admin password |
+| GET | `/api/auth/me` | Get current user |
 
-# build for production (usually frontend build)
-npm run build
+### Canteens
 
-# preview built frontend
-npm run preview
-```
+| Method | Endpoint | Role | Description |
+|--------|----------|------|-------------|
+| GET | `/api/canteens/public` | Public | List all canteens |
+| GET | `/api/canteens/me` | Admin | Get admin's canteen |
+| POST | `/api/canteens/me` | Admin | Create canteen |
+| PUT | `/api/canteens/me` | Admin | Update canteen |
+| POST | `/api/canteens/me/menu` | Admin | Add menu item |
+| PUT | `/api/canteens/me/menu/:id` | Admin | Update menu item |
+| DELETE | `/api/canteens/me/menu/:id` | Admin | Delete menu item |
 
-Check the root package.json to see exactly how scripts are forwarded and modify to suit your local workflow.
+### Orders
 
+| Method | Endpoint | Role | Description |
+|--------|----------|------|-------------|
+| POST | `/api/orders` | Student | Create order |
+| GET | `/api/orders/me` | Student | Get my orders |
 
-## 🛠️ Development tips & troubleshooting
+---
 
-- MongoDB connection issues:
-  - 🔍 Verify `MONGODB_URI` and network access (IP allowlist for Atlas).
-  - 📄 Check backend logs for connection errors.
+## Deployment
 
-- JWT issues:
-  - 🔑 Ensure `JWT_SECRET` is set consistently across environments.
-  - 🔁 If tokens appear invalid after code changes, restart servers.
+### Frontend (Vercel)
 
-- OTP flow:
-  - ✉️ If OTPs are sent via email in production, use a dev/test provider or a mocked transport locally.
+1. Push to GitHub
+2. Import repository on Vercel
+3. Set root directory to `bitz-frontend`
+4. Set environment variables:
+   - `VITE_API_URL` - Your production backend URL
+   - `VITE_GOOGLE_CLIENT_ID` - Google OAuth client ID
+5. Deploy
 
-- Ports:
-  - 🔢 If ports collide, update `PORT` in backend and dev server settings in frontend.
+### Backend (Railway / Render)
 
-- Logging:
-  - 📝 Increase log verbosity while debugging; revert before production.
+1. Create a new project on Railway or Render
+2. Connect your GitHub repository
+3. Set root directory to `bitz-backend`
+4. Set environment variables:
+   - `MONGODB_URI` - MongoDB Atlas connection string
+   - `JWT_SECRET` - Secure random string (32+ chars)
+   - `CLIENT_ORIGIN` - Your Vercel frontend URL
+   - `NODE_ENV` - production
+5. Deploy
 
+---
 
-## 🚧 Currently working on / Improvements
+## What's Next (v2 Roadmap)
 
-Working items (short, emoji-enhanced list) plus a piping-style status table for quick glance.
+Planned features and improvements for the next version:
 
-- 🧾 Improve ordering flow: cart persistence across sessions
-- 🔁 Better order status UI & real-time updates (WebSocket or polling)
-- 💳 Payment integration (Stripe or similar)
-- 📚 API documentation (OpenAPI/Swagger or Postman)
-- 🧪 Tests & CI (unit/integration tests + GitHub Actions)
-- 🔒 Reliability & security (rate limiting, validation, error handling)
-- 🐳 Docker support for local development
-- ♿ Accessibility & UX improvements
+| Feature | Priority | Status |
+|---------|----------|--------|
+| Real-time order updates via WebSocket | High | Planned |
+| Push notifications for order status | High | Planned |
+| Payment integration (UPI + Stripe) | High | Planned |
+| Cart persistence across sessions | Medium | In Progress |
+| Order history with reorder functionality | Medium | Planned |
+| Canteen analytics dashboard (charts) | Medium | Planned |
+| Multi-canteen support per admin | Low | Planned |
+| Student wallet and loyalty points | Low | Planned |
+| SMS/WhatsApp order notifications | Low | Planned |
+| Admin mobile app (React Native) | Low | Planned |
 
-Quick "piping" status table (Task | Status | Owner):
+---
 
-| Task | Status | Owner |
-|---|---:|:---:|
-| Cart persistence | In progress 🚧 | @himaaanshuu |
-| Order real-time updates | Planning 📝 | — |
-| Payment integration | Backlog ⏳ | — |
-| API docs (Swagger) | In progress 🧾 | — |
-| Tests & CI | Backlog 🧪 | — |
+## Known Issues
 
-(You can edit this table as tasks move between statuses. The pipes `|` create an easy-to-read matrix.)
+| Issue | Severity | Workaround |
+|-------|----------|------------|
+| OTP rate limiting not enforced | Medium | Avoid excessive requests in dev |
+| CORS issues in local dev | Low | Use Vite proxy or set CORS headers |
+| No input validation on some endpoints | Medium | Validate on client side |
 
-If you'd like, I can convert these into GitHub issues and add labels/milestones.
+---
 
+## Contributing
 
-## 🐞 Current issues / Known bugs
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feat/your-feature`
+3. Make your changes and test
+4. Commit with a descriptive message
+5. Push and open a Pull Request
 
-Short descriptions and suggested workarounds. Use these to populate issue trackers.
+---
 
-- ⚠️ Admin seeder may fail if required env vars are missing
-  - Workaround: Ensure `MONGODB_URI` and other env vars are set before running `npm run seed:admin`.
-- 🛑 OTP rate limiting not enforced (potential spam risk)
-  - Mitigation: Manually avoid excessive OTP requests; will add rate-limiting middleware soon.
-- 🌐 CORS or proxy issues when frontend calls backend in dev
-  - Workaround: Configure Vite proxy or set correct CORS headers in backend.
-- 🧾 Missing validation on student registration endpoint (server may accept malformed input)
-  - Mitigation: Validate input on client and server; add backend request validation.
-- 💥 Server crashes on unhandled exceptions in some routes
-  - Mitigation: Restart server; add centralized error handling and process-level guards.
-- 🧩 Frontend build or environment mismatches
-  - Mitigation: Ensure Node version matches the project's supported version; run `npm ci` and rebuild.
+## License
 
-Piping-style issue summary (ID | Short | Severity):
+MIT
 
-| ID | Short | Severity |
-|---:|---|:---:|
-| #1 | Admin seeder env fail | High 🔴 |
-| #2 | No OTP rate limit | Medium 🟠 |
-| #3 | CORS dev issue | Low 🟡 |
+---
 
-Want these populated from live GitHub issues? I can fetch them and update this section automatically.
+## Author
 
-
-## 🤝 Contributing
-
-Contributions welcome! Suggested workflow:
-
-1. Fork the repo
-2. Create a branch: `git checkout -b feat/your-feature`
-3. Implement changes and add tests where applicable
-4. Open a Pull Request with a descriptive title and summary
-
-Please add a short description of any breaking changes and how to test them.
-
-
-## 📄 License & contact
-
-- License: add your license file (e.g., MIT) if not present.
-- Contact / maintainer: @himaaanshuu
-
-
-If you want, I can:
-- ✅ Commit this README update and open a PR for you,
-- 🔁 Pull the current open GitHub issues and populate the "Current issues" section with live data,
-- 🧭 Create GitHub issues from the "Currently working on" table and assign priorities.
-
-```
+[@himaaanshuu](https://github.com/himaaanshuu)

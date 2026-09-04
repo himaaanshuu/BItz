@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { AnimatePresence } from 'framer-motion';
 import './App.css';
 
 // Components
 import Footer from './components/Footer';
+import PageTransition from './components/PageTransition';
 
 // Pages
 import Home from './pages/Home';
@@ -35,12 +37,10 @@ const ProtectedStudentRoute = ({ children }) => {
     .split(';')
     .some((cookie) => cookie.trim().startsWith('bitezAuth=admin'));
 
-  // If admin is logged in, redirect to admin dashboard
   if (hasAdminCookie) {
     return <Navigate to="/admin-dashboard" />;
   }
 
-  // If student not logged in, redirect to student login
   if (!authToken || !hasStudentCookie) {
     return <Navigate to="/student-login" />;
   }
@@ -58,18 +58,124 @@ const ProtectedAdminRoute = ({ children }) => {
     .split(';')
     .some((cookie) => cookie.trim().startsWith('bitezAuth=admin'));
 
-  // If student is logged in, redirect to student dashboard
   if (hasStudentCookie) {
     return <Navigate to="/student-dashboard" />;
   }
 
-  // If admin not logged in, redirect to admin login
   if (!authToken || !hasAdminCookie) {
     return <Navigate to="/admin-login" />;
   }
 
   return children;
 };
+
+function AnimatedRoutes() {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <PageTransition key={location.pathname}>
+        <Routes location={location}>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/auth" element={<AuthPortal />} />
+          <Route path="/privacy" element={<Privacy />} />
+
+          {/* Student Routes */}
+          <Route path="/student-login" element={<StudentLogin />} />
+
+          <Route
+            path="/student-dashboard"
+            element={
+              <ProtectedStudentRoute>
+                <StudentDashboard />
+              </ProtectedStudentRoute>
+            }
+          />
+
+          <Route
+            path="/order"
+            element={
+              <ProtectedStudentRoute>
+                <OrderPage />
+              </ProtectedStudentRoute>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <ProtectedStudentRoute>
+                <Profile />
+              </ProtectedStudentRoute>
+            }
+          />
+
+          <Route
+            path="/order-history"
+            element={
+              <ProtectedStudentRoute>
+                <OrderHistory />
+              </ProtectedStudentRoute>
+            }
+          />
+
+          <Route
+            path="/current-order"
+            element={
+              <ProtectedStudentRoute>
+                <CurrentOrder />
+              </ProtectedStudentRoute>
+            }
+          />
+
+          <Route
+            path="/track"
+            element={
+              <ProtectedStudentRoute>
+                <TrackOrder />
+              </ProtectedStudentRoute>
+            }
+          />
+
+          {/* Admin Routes */}
+          <Route path="/admin-login" element={<AdminLogin />} />
+
+          <Route
+            path="/admin-dashboard"
+            element={
+              <ProtectedAdminRoute>
+                <AdminDashboard />
+              </ProtectedAdminRoute>
+            }
+          />
+
+          <Route
+            path="/admin-settings"
+            element={
+              <ProtectedAdminRoute>
+                <AdminSettings />
+              </ProtectedAdminRoute>
+            }
+          />
+
+          <Route
+            path="/admin-analytics"
+            element={
+              <ProtectedAdminRoute>
+                <AdminAnalytics />
+              </ProtectedAdminRoute>
+            }
+          />
+
+          {/* Fallback Route */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </PageTransition>
+    </AnimatePresence>
+  );
+}
 
 function App() {
   const [canteens, setCanteens] = useState([
@@ -141,104 +247,7 @@ function App() {
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || 'dummy-client-id.apps.googleusercontent.com'}>
       <Router>
         <div className="min-h-screen">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/auth" element={<AuthPortal />} />
-            <Route path="/privacy" element={<Privacy />} />
-
-            {/* Student Routes */}
-            <Route path="/student-login" element={<StudentLogin />} />
-
-            <Route
-              path="/student-dashboard"
-              element={
-                <ProtectedStudentRoute>
-                  <StudentDashboard canteens={canteens} />
-                </ProtectedStudentRoute>
-              }
-            />
-
-            <Route
-              path="/order"
-              element={
-                <ProtectedStudentRoute>
-                  <OrderPage />
-                </ProtectedStudentRoute>
-              }
-            />
-
-            <Route
-              path="/profile"
-              element={
-                <ProtectedStudentRoute>
-                  <Profile />
-                </ProtectedStudentRoute>
-              }
-            />
-
-            <Route
-              path="/order-history"
-              element={
-                <ProtectedStudentRoute>
-                  <OrderHistory />
-                </ProtectedStudentRoute>
-              }
-            />
-
-            <Route
-              path="/current-order"
-              element={
-                <ProtectedStudentRoute>
-                  <CurrentOrder />
-                </ProtectedStudentRoute>
-              }
-            />
-
-            <Route
-              path="/track"
-              element={
-                <ProtectedStudentRoute>
-                  <TrackOrder />
-                </ProtectedStudentRoute>
-              }
-            />
-
-            {/* Admin Routes */}
-            <Route path="/admin-login" element={<AdminLogin />} />
-
-            <Route
-              path="/admin-dashboard"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminDashboard addCanteen={addCanteen} />
-                </ProtectedAdminRoute>
-              }
-            />
-
-            <Route
-              path="/admin-settings"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminSettings />
-                </ProtectedAdminRoute>
-              }
-            />
-
-            <Route
-              path="/admin-analytics"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminAnalytics />
-                </ProtectedAdminRoute>
-              }
-            />
-
-            {/* Fallback Route */}
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-
+          <AnimatedRoutes />
           <Footer />
         </div>
       </Router>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="96" fill="#F97316"/>
+  
+  <!-- Fork and knife icon -->
+  <g transform="translate(58, 40)">
+    <!-- Fork -->
+    <g>
+      <rect x="14" y="0" width="4" height="44" rx="2" fill="white"/>
+      <rect x="22" y="0" width="4" height="44" rx="2" fill="white"/>
+      <rect x="30" y="0" width="4" height="44" rx="2" fill="white"/>
+      <rect x="14" y="38" width="20" height="6" rx="3" fill="white"/>
+      <rect x="22" y="44" width="4" height="36" rx="2" fill="white"/>
+    </g>
+    
+    <!-- Knife -->
+    <g transform="translate(46, 0)">
+      <path d="M4 0 C4 0 12 0 12 10 L12 80 C12 84 8 86 4 86 L4 90 L12 90 L12 86 L12 80 C12 80 12 80 12 80" fill="white"/>
+      <rect x="4" y="0" width="8" height="80" rx="4" fill="white"/>
+    </g>
+  </g>
+  
+  <!-- Bite mark -->
+  <circle cx="155" cy="75" r="18" fill="#EA580C"/>
+  <circle cx="160" cy="60" r="5" fill="#EA580C"/>
+  <circle cx="150" cy="88" r="4" fill="#EA580C"/>
+  
+  <!-- "bitez" text -->
+  <text x="100" y="158" text-anchor="middle" font-family="'Arial Black', 'Helvetica Neue', sans-serif" font-weight="900" font-size="42" fill="white" letter-spacing="2">bitez</text>
+  
+  <!-- Tagline -->
+  <text x="100" y="178" text-anchor="middle" font-family="Arial, sans-serif" font-weight="600" font-size="10" fill="white" opacity="0.8" letter-spacing="1">CAMPUS FOOD ORDERING</text>
+</svg>

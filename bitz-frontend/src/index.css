@@ -6,7 +6,7 @@
   :root {
     --background: #fafafa;
     --foreground: #0f172a;
-    --primary: #f97316; /* Orange 500 */
+    --primary: #f97316;
     --primary-foreground: #ffffff;
     --border: #e2e8f0;
     --card: #ffffff;
@@ -28,6 +28,51 @@
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Better scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+  /* Horizontal scroll for dashboards */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scroll-horizontal {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scroll-horizontal > * {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
 }
 
 @layer utilities {
@@ -46,12 +91,32 @@
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
+
+  /* Stagger children animation helper */
+  .stagger-children > * {
+    opacity: 0;
+    transform: translateY(12px);
+    animation: stagger-in 0.4s ease forwards;
+  }
+  .stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+  .stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+  .stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+  .stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+  .stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+  .stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
 }
 
 @keyframes float {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
   100% { transform: translateY(0px); }
+}
+
+@keyframes stagger-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes drop-in {
