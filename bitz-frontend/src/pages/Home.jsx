@@ -46,7 +46,7 @@ const Home = () => {
       <motion.div
         ref={heroRef}
         style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
-        className="max-w-7xl mx-auto px-6 pt-24 pb-16 relative z-10"
+        className="max-w-7xl mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-12 sm:pb-16 relative z-10"
       >
         <div className="max-w-4xl mx-auto text-center space-y-10">
           <ScrollReveal variant="fadeUp" delay={0.1}>
@@ -60,7 +60,7 @@ const Home = () => {
           </ScrollReveal>
 
           <ScrollReveal variant="fadeUp" delay={0.25}>
-            <h1 className="text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight text-slate-900">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight text-slate-900">
               Skip The Queue.<br />
               <span className="text-gradient">Savor The Flavor.</span>
             </h1>

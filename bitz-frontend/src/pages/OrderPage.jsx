@@ -1,10 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Component } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Plus, Minus, X, ChevronRight, CreditCard, Wallet, User, LogOut, Package, Clock } from 'lucide-react';
 import { api } from '../services/api';
 import { CardPaymentModal } from '../components/CardPaymentModal';
 
-const OrderPage = () => {
+class OrderErrorBoundary extends Component {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-slate-800 mb-3">Unable to load order page</h2>
+            <p className="text-slate-500 mb-6">Please try logging in again.</p>
+            <button onClick={() => window.location.href = '/student-login'} className="bg-gradient-to-r from-orange-500 to-rose-500 text-white px-8 py-3 rounded-2xl font-bold">Login Again</button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const OrderPageContent = () => {
   const [canteens, setCanteens] = useState([]);
   const [canteensLoading, setCanteensLoading] = useState(true);
   const [selectedCanteen, setSelectedCanteen] = useState(null);
@@ -554,4 +573,6 @@ const OrderPage = () => {
   );
 };
 
-export default OrderPage;
+export default function OrderPageWrapper() {
+  return <OrderErrorBoundary><OrderPageContent /></OrderErrorBoundary>;
+}

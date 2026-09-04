@@ -86,7 +86,11 @@
     @apply bg-white/40 backdrop-blur-2xl border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)];
   }
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-rose-600;
+    background: linear-gradient(135deg, #f97316, #e11d48);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
   }
   .animate-float {
     animation: float 6s ease-in-out infinite;
