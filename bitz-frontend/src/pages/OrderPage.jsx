@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Plus, Minus, X, ChevronRight, CreditCard, Wallet, User, LogOut, Package } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X, ChevronRight, CreditCard, Wallet, User, LogOut, Package, Clock } from 'lucide-react';
 import { api } from '../services/api';
 import { CardPaymentModal } from '../components/CardPaymentModal';
 
