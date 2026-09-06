@@ -1,31 +1,39 @@
-import twilio from 'twilio';
-
-const buildTwilioClient = () => {
-  if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
-    return null;
-  }
-
-  return twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-};
-
 export const sendOtpSms = async ({ to, otp }) => {
-  const client = buildTwilioClient();
-  if (!client || !process.env.TWILIO_PHONE) {
-    console.log(`[OTP SMS] ${to}: ${otp}`);
-    return { delivered: false, preview: 'Twilio not configured; OTP logged.' };
+  const authKey = process.env.MSG91_AUTH_KEY;
+  const serviceId = process.env.MSG91_SERVICE_ID;
+
+  if (!authKey || !serviceId) {
+    console.log(`[OTP SMS] ${to}: ${otp} (MSG91 not configured, OTP logged only)`);
+    return { delivered: false, preview: 'MSG91 not configured; OTP logged.' };
   }
 
   try {
-    await client.messages.create({
-      body: `Your Bitez OTP is ${otp}. It expires in 5 minutes.`,
-      from: process.env.TWILIO_PHONE,
-      to,
+    const response = await fetch('https://api.msg91.com/api/v5/otp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'authkey': authKey,
+      },
+      body: JSON.stringify({
+        mobile: to.replace('+', ''),
+        otp: otp,
+        msg91: serviceId,
+      }),
     });
 
-    return { delivered: true };
+    const data = await response.json();
+
+    if (data.type === 'success') {
+      console.log(`[OTP SMS] Sent to ${to} via MSG91`);
+      return { delivered: true };
+    } else {
+      console.error('[OTP SMS] MSG91 error:', data);
+      console.log(`[OTP SMS] ${to}: ${otp} (fallback: logged)`);
+      return { delivered: false, preview: `MSG91 error: ${data.message || 'Unknown error'}` };
+    }
   } catch (error) {
-    console.error('SMS OTP delivery failed:', error.message);
-    console.log(`[OTP SMS] ${to}: ${otp}`);
-    return { delivered: false, preview: 'Twilio error; OTP logged.' };
+    console.error('[OTP SMS] MSG91 request failed:', error.message);
+    console.log(`[OTP SMS] ${to}: ${otp} (fallback: logged)`);
+    return { delivered: false, preview: 'MSG91 request failed; OTP logged.' };
   }
 };
