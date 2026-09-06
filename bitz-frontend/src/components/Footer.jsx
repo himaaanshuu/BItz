@@ -52,14 +52,14 @@ const Footer = () => {
                   </Link>
                 </motion.div>
                 <motion.div whileHover={{ x: 4 }}>
-                  <a href="#" className="block text-gray-400 hover:text-orange-400 transition">
+                  <Link to="/privacy" className="block text-gray-400 hover:text-orange-400 transition">
                     Terms of Service
-                  </a>
+                  </Link>
                 </motion.div>
                 <motion.div whileHover={{ x: 4 }}>
-                  <a href="#" className="block text-gray-400 hover:text-orange-400 transition">
+                  <Link to="/privacy" className="block text-gray-400 hover:text-orange-400 transition">
                     Refund Policy
-                  </a>
+                  </Link>
                 </motion.div>
               </div>
             </div>
@@ -70,7 +70,7 @@ const Footer = () => {
             <div>
               <h4 className="font-bold text-lg mb-4 text-orange-500">Contact</h4>
               <div className="space-y-2 text-gray-400">
-                <p>himanshu@bitez-theta.vercel.app</p>
+                <p>himanshu2005gupta@gmail.com</p>
               </div>
             </div>
           </ScrollReveal>

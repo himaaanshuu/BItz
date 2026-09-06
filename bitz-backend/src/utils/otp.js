@@ -10,5 +10,8 @@ export const hashOtp = (otp) => {
 };
 
 export const compareOtp = (otp, hash) => {
-  return hashOtp(otp) === hash;
+  const hashToCompare = Buffer.from(hashOtp(otp), 'hex');
+  const hashBuffer = Buffer.from(hash, 'hex');
+  if (hashToCompare.length !== hashBuffer.length) return false;
+  return crypto.timingSafeEqual(hashToCompare, hashBuffer);
 };

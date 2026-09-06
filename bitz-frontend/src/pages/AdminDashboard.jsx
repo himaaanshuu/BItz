@@ -127,8 +127,9 @@ const AdminDashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('bitezAdmin');
     localStorage.removeItem('bitezAuthToken');
+    localStorage.removeItem('bitezAdminLoginTime');
     document.cookie = 'bitezAuth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    window.location.href = '/';
+    navigate('/');
   };
 
   if (!canteenData) {

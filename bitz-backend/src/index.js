@@ -64,7 +64,7 @@ app.use(
   }),
 );
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/canteens", canteenRoutes);
@@ -76,6 +76,9 @@ app.get("/api/health", (req, res) => {
 });
 
 app.get("/api/seed", async (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(403).json({ message: 'Seed endpoint is disabled in production.' });
+  }
   try {
     const existingAdmin = await User.findOne({ email: 'himanshu2005gupta@gmail.com' });
     if (existingAdmin) {

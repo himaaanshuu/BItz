@@ -124,9 +124,11 @@ const Navbar = () => {
   }, []);
 
   const handleLogout = () => {
-    if (userType === 'student') localStorage.removeItem('bitezUser');
-    else if (userType === 'admin') localStorage.removeItem('bitezAdmin');
+    localStorage.removeItem('bitezUser');
+    localStorage.removeItem('bitezAdmin');
     localStorage.removeItem('bitezAuthToken');
+    localStorage.removeItem('bitezStudentLoginTime');
+    localStorage.removeItem('bitezAdminLoginTime');
     document.cookie = 'bitezAuth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     setIsLoggedIn(false);
     setIsDropdownOpen(false);

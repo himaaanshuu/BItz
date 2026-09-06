@@ -203,6 +203,7 @@ const OrderPageContent = () => {
   const handleLogout = () => {
     localStorage.removeItem('bitezAuthToken');
     localStorage.removeItem('bitezUser');
+    localStorage.removeItem('bitezStudentLoginTime');
     sessionStorage.removeItem('bitezUser');
     document.cookie = 'bitezAuth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     navigate('/student-login');
@@ -323,7 +324,7 @@ const OrderPageContent = () => {
               <div className="flex justify-center py-12">
                 <div className="w-16 h-16 relative">
                    <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=128&q=80" alt="Loading burger" className="w-full h-full object-cover rounded-full animate-spin shadow-[0_0_15px_rgba(249,115,22,0.3)]" />
-                   <div className="absolute inset-0 rounded-full border-2 border-orange-500 border-t-transparent animate-spin-slow"></div>
+                   <div className="absolute inset-0 rounded-full border-2 border-orange-500 border-t-transparent animate-spin"></div>
                 </div>
               </div>
             ) : canteens.length === 0 ? (

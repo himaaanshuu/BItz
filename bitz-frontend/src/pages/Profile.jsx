@@ -27,7 +27,11 @@ const Profile = () => {
 
     const storedUser = localStorage.getItem('bitezUser');
     if (storedUser) {
-      setUserData(JSON.parse(storedUser));
+      try {
+        setUserData(JSON.parse(storedUser));
+      } catch {
+        navigate('/student-login');
+      }
     }
   }, [navigate]);
 

@@ -152,8 +152,7 @@ router.post('/student/request-otp', async (req, res) => {
   try {
     return await handleStudentPhoneOtpRequest(req, res);
   } catch (error) {
-    console.error('[Student OTP Error]', error.message, error.stack);
-    return res.status(500).json({ message: 'OTP request failed', detail: error.message });
+    return res.status(500).json({ message: 'OTP request failed' });
   }
 });
 
@@ -161,8 +160,7 @@ router.post('/admin/request-otp', async (req, res) => {
   try {
     return await handleOtpRequest({ req, res, role: 'admin' });
   } catch (error) {
-    console.error('[Admin OTP Error]', error.message, error.stack);
-    return res.status(500).json({ message: 'OTP request failed', detail: error.message });
+    return res.status(500).json({ message: 'OTP request failed' });
   }
 });
 

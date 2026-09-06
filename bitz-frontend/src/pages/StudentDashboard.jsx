@@ -19,7 +19,6 @@ const StudentDashboard = () => {
       .some((cookie) => cookie.trim().startsWith('bitezAuth=student'));
 
     if (!userData || !token || !hasAuthCookie) {
-      alert('No user data found. Please login first.');
       setLoading(false);
       return;
     }
@@ -33,8 +32,8 @@ const StudentDashboard = () => {
         setOrders(JSON.parse(savedOrders));
       }
     } catch (error) {
-      console.error('Error loading user data:', error);
-      alert('Error loading user data: ' + error.message);
+      setLoading(false);
+      return;
     } finally {
       setLoading(false);
     }
@@ -43,8 +42,8 @@ const StudentDashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('bitezAuthToken');
     localStorage.removeItem('bitezUser');
+    localStorage.removeItem('bitezStudentLoginTime');
     document.cookie = 'bitezAuth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    alert('Logged out successfully!');
     setUser(null);
     navigate('/student-login');
   };

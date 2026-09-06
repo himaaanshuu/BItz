@@ -36,39 +36,42 @@ router.put('/:orderId/status', auth, requireRole('admin'), async (req, res) => {
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ message: 'Invalid status.' });
     }
-    const order = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
+    const order = await Order.findById(orderId);
     if (!order) return res.status(404).json({ message: 'Order not found.' });
+    
+    const canteen = await Canteen.findOne({ ownerId: req.user.id });
+    if (!canteen || String(order.canteenId) !== String(canteen._id)) {
+      return res.status(403).json({ message: 'Not authorized to update this order.' });
+    }
+    
+    order.status = status;
+    await order.save();
     res.json({ order });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to update order status' });
+    res.status(500).json({ message: safeErrorMessage('Failed to update order status', error) });
   }
 });
 
 router.post('/', auth, requireRole('student'), async (req, res) => {
   try {
-    const { canteenId, items, total, paymentMethod, deliveryAddress } = req.body;
+    const { canteenId, items, paymentMethod, deliveryAddress } = req.body;
 
-    if (!canteenId || !items || !Array.isArray(items) || items.length === 0 || total == null || !paymentMethod) {
-      return res.status(400).json({ message: 'canteenId, items, total, and paymentMethod are required.' });
+    if (!canteenId || !items || !Array.isArray(items) || items.length === 0 || !paymentMethod) {
+      return res.status(400).json({ message: 'canteenId, items, and paymentMethod are required.' });
     }
 
-    if (!Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ message: 'Order must contain at least one item.' });
-    }
     for (const item of items) {
       if (!item.name || typeof item.price !== 'number' || item.price <= 0 || !Number.isInteger(item.quantity) || item.quantity < 1) {
         return res.status(400).json({ message: 'Invalid item data.' });
       }
     }
 
-    if (typeof total !== 'number' || !isFinite(total) || total <= 0) {
-      return res.status(400).json({ message: 'Invalid order total.' });
-    }
-
     const canteen = await Canteen.findById(canteenId);
     if (!canteen) {
       return res.status(404).json({ message: 'Canteen not found.' });
     }
+
+    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     const tokenNumber = Math.floor(Math.random() * 9000) + 1000;
     const paymentStatus = paymentMethod === 'cash' ? 'paid' : 'pending';
@@ -83,7 +86,7 @@ router.post('/', auth, requireRole('student'), async (req, res) => {
         category: category || '',
         canteenName: canteenName || canteen.name,
       })),
-      total: Number(total),
+      total,
       paymentMethod: paymentMethod.toLowerCase(),
       paymentStatus,
       tokenNumber,

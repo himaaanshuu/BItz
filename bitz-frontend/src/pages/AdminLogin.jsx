@@ -55,7 +55,7 @@ const AdminLogin = () => {
       });
       setMessage(response.message || 'OTP sent to your phone.');
       setOtpRequested(true);
-      if (response.otp) {
+      if (import.meta.env.DEV && response.otp) {
         setOtpPreview(`Dev OTP: ${response.otp}`);
       }
       startOtpTimer();

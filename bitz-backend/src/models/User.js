@@ -2,11 +2,6 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    clerkUserId: {
-      type: String,
-      unique: true,
-      sparse: true,
-    },
     name: {
       type: String,
       required: true,
@@ -41,6 +36,9 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+
+userSchema.index({ phone: 1 });
+userSchema.index({ role: 1 });
 
 const User = mongoose.model("User", userSchema);
 
