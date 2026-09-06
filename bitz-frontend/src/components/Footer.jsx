@@ -79,7 +79,7 @@ const Footer = () => {
 
         <ScrollReveal variant="fadeIn" delay={0.5}>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>© 2024 Bitez. Made with care for students</p>
+            <p>© 2026 Bitez. Made with care for students</p>
           </div>
         </ScrollReveal>
       </div>

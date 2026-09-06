@@ -18,7 +18,7 @@ const Privacy = () => {
             <Shield className="text-orange-500" size={40} />
           </div>
           <h1 className="text-5xl font-black text-slate-900 mb-4 tracking-tight">Privacy Policy</h1>
-          <p className="text-slate-500 text-lg font-medium">Last updated: January 19, 2024</p>
+          <p className="text-slate-500 text-lg font-medium">Last updated: January 19, 2026</p>
         </div>
 
         {/* Content */}

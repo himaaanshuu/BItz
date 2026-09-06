@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import Navbar from '../components/Navbar';
 import AnimatedBanner from '../components/AnimatedBanner';
 import ScrollReveal from '../components/ScrollReveal';
 import { Target, Lightbulb, Users, ListCheck, Smartphone, Timer, Ticket, BarChart3, UserCog, Clock, Banknote } from 'lucide-react';
@@ -23,6 +24,7 @@ const adminFeatures = [
 const About = () => {
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-slate-800 relative">
+      <Navbar />
       {/* Background Decorators */}
       <motion.div
         className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-100/50 rounded-full mix-blend-multiply filter blur-3xl opacity-50 pointer-events-none"

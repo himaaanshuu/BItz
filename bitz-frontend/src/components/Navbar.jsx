@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, ShoppingBag, Clock, LogOut, ChevronDown, Settings, BarChart3, Menu as MenuIcon, X, Home, Package, History } from 'lucide-react';
+import { User, ShoppingBag, LogOut, ChevronDown, Settings, BarChart3, Menu as MenuIcon, X, Home, Package, History } from 'lucide-react';
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
