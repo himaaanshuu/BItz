@@ -83,6 +83,7 @@ const requestOtpForUser = async ({ user, email, phone }) => {
 
 const handleOtpRequest = async ({ req, res, role }) => {
   const { email, phone } = req.body;
+  console.log(`[OTP Request] role=${role} email=${email} phone=${phone}`);
 
   if (!email || !phone) {
     return res.status(400).json({ message: 'Email and phone are required.' });
@@ -117,6 +118,7 @@ const handleOtpRequest = async ({ req, res, role }) => {
 
 const handleStudentPhoneOtpRequest = async (req, res) => {
   const { phone } = req.body;
+  console.log(`[Student OTP Request] phone=${phone}`);
 
   if (!phone) {
     return res.status(400).json({ message: 'Phone number is required.' });
@@ -150,7 +152,8 @@ router.post('/student/request-otp', async (req, res) => {
   try {
     return await handleStudentPhoneOtpRequest(req, res);
   } catch (error) {
-    return res.status(500).json({ message: safeErrorMessage('OTP request failed', error) });
+    console.error('[Student OTP Error]', error.message, error.stack);
+    return res.status(500).json({ message: 'OTP request failed', detail: error.message });
   }
 });
 
@@ -158,7 +161,8 @@ router.post('/admin/request-otp', async (req, res) => {
   try {
     return await handleOtpRequest({ req, res, role: 'admin' });
   } catch (error) {
-    return res.status(500).json({ message: safeErrorMessage('OTP request failed', error) });
+    console.error('[Admin OTP Error]', error.message, error.stack);
+    return res.status(500).json({ message: 'OTP request failed', detail: error.message });
   }
 });
 
