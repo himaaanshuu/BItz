@@ -5,19 +5,19 @@ import ScrollReveal from '../components/ScrollReveal';
 import { Target, Lightbulb, Users, ListCheck, Smartphone, Timer, Ticket, BarChart3, UserCog, Clock, Banknote } from 'lucide-react';
 
 const steps = [
-  { icon: <Users className="text-rose-400" size={20} />, text: 'Students login with their phone numbers' },
-  { icon: <ListCheck className="text-rose-400" size={20} />, text: 'Browse menus from multiple canteens' },
-  { icon: <Smartphone className="text-rose-400" size={20} />, text: 'Place orders and choose payment method' },
-  { icon: <Timer className="text-rose-400" size={20} />, text: 'Track live queue and prep time' },
-  { icon: <Ticket className="text-rose-400" size={20} />, text: 'Get token number for pickup' },
+  { icon: <Users className="text-white" size={20} />, text: 'Students login with their phone numbers' },
+  { icon: <ListCheck className="text-white" size={20} />, text: 'Browse menus from multiple canteens' },
+  { icon: <Smartphone className="text-white" size={20} />, text: 'Place orders and choose payment method' },
+  { icon: <Timer className="text-white" size={20} />, text: 'Track live queue and prep time' },
+  { icon: <Ticket className="text-white" size={20} />, text: 'Get token number for pickup' },
 ];
 
 const adminFeatures = [
-  { icon: <BarChart3 className="text-sky-500" size={20} />, text: 'Real-time dashboard with order management' },
-  { icon: <Users className="text-sky-500" size={20} />, text: 'View customer details and order history' },
-  { icon: <Clock className="text-sky-500" size={20} />, text: 'Update queue count and prep times' },
-  { icon: <Ticket className="text-sky-500" size={20} />, text: 'Issue token numbers automatically' },
-  { icon: <Banknote className="text-sky-500" size={20} />, text: 'Track payments seamlessly' },
+  { icon: <BarChart3 className="text-orange-500" size={20} />, text: 'Real-time dashboard with order management' },
+  { icon: <Users className="text-orange-500" size={20} />, text: 'View customer details and order history' },
+  { icon: <Clock className="text-orange-500" size={20} />, text: 'Update queue count and prep times' },
+  { icon: <Ticket className="text-orange-500" size={20} />, text: 'Issue token numbers automatically' },
+  { icon: <Banknote className="text-orange-500" size={20} />, text: 'Track payments seamlessly' },
 ];
 
 const About = () => {
@@ -78,11 +78,11 @@ const About = () => {
           <ScrollReveal variant="fadeRight" delay={0.15}>
             <motion.div
               whileHover={{ y: -4 }}
-              className="bg-slate-900 text-white p-8 rounded-[2rem] my-8 border border-slate-700 shadow-2xl relative overflow-hidden"
+              className="bg-gradient-to-br from-orange-500 via-orange-500 to-rose-600 text-white p-8 rounded-[2rem] my-8 shadow-2xl relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/10 rounded-full filter blur-[40px]" />
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[40px]" />
               <h3 className="text-2xl font-black mb-6 flex items-center gap-3">
-                <div className="p-2 bg-rose-500/20 text-rose-400 rounded-xl"><Lightbulb size={24} /></div>
+                <div className="p-2 bg-white/20 text-white rounded-xl"><Lightbulb size={24} /></div>
                 How It Works
               </h3>
               <ul className="space-y-4 text-lg">
@@ -92,7 +92,7 @@ const About = () => {
                       whileHover={{ x: 6 }}
                       className="flex items-center gap-3"
                     >
-                      <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
                         {step.icon}
                       </div>
                       <span className="text-white font-medium">{step.text}</span>
@@ -109,9 +109,9 @@ const About = () => {
               whileHover={{ y: -4 }}
               className="bg-white/70 backdrop-blur-md p-8 rounded-[2rem] my-8 border border-white shadow-lg relative overflow-hidden"
             >
-              <div className="absolute bottom-0 right-0 w-40 h-40 bg-sky-200/40 rounded-tl-full -mr-10 -mb-10" />
+              <div className="absolute bottom-0 right-0 w-40 h-40 bg-orange-200/40 rounded-tl-full -mr-10 -mb-10" />
               <h3 className="text-2xl font-black mb-6 text-slate-800 flex items-center gap-3">
-                <div className="p-2 bg-sky-100 text-sky-600 rounded-xl"><UserCog size={24} /></div>
+                <div className="p-2 bg-orange-100 text-orange-600 rounded-xl"><UserCog size={24} /></div>
                 For Canteen Admins
               </h3>
               <ul className="space-y-4 text-lg font-medium text-slate-600">
@@ -121,7 +121,7 @@ const About = () => {
                       whileHover={{ x: 6 }}
                       className="flex items-center gap-3"
                     >
-                      <div className="w-10 h-10 bg-sky-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
                         {feature.icon}
                       </div>
                       <span>{feature.text}</span>

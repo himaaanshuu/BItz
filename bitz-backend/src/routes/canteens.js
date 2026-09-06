@@ -87,7 +87,7 @@ router.put('/me', auth, requireRole('admin'), async (req, res) => {
 
 router.post('/me/menu', auth, requireRole('admin'), async (req, res) => {
   try {
-    const { name, price, category, available } = req.body;
+    const { name, price, category, available, imageUrl } = req.body;
 
     if (!name || price === undefined || !category) {
       return res.status(400).json({ message: 'Name, price, and category are required.' });
@@ -98,7 +98,7 @@ router.post('/me/menu', auth, requireRole('admin'), async (req, res) => {
       return res.status(404).json({ message: 'Canteen not found.' });
     }
 
-    canteen.menuItems.push({ name, price, category, available: available ?? true });
+    canteen.menuItems.push({ name, price, category, available: available ?? true, imageUrl: imageUrl || '' });
     await canteen.save();
 
     return res.status(201).json({ canteen });
@@ -110,7 +110,7 @@ router.post('/me/menu', auth, requireRole('admin'), async (req, res) => {
 router.put('/me/menu/:itemId', auth, requireRole('admin'), async (req, res) => {
   try {
     const { itemId } = req.params;
-    const { name, price, category, available } = req.body;
+    const { name, price, category, available, imageUrl } = req.body;
 
     const canteen = await Canteen.findOne({ ownerId: req.user.id });
     if (!canteen) {
@@ -126,6 +126,7 @@ router.put('/me/menu/:itemId', auth, requireRole('admin'), async (req, res) => {
     if (price !== undefined) item.price = price;
     if (category !== undefined) item.category = category;
     if (available !== undefined) item.available = available;
+    if (imageUrl !== undefined) item.imageUrl = imageUrl;
 
     await canteen.save();
 

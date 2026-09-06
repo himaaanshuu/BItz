@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, ShoppingBag, Clock, LogOut, ChevronDown, Settings, BarChart3, Menu as MenuIcon, X, Home, Package, History } from 'lucide-react';
 
@@ -48,6 +48,7 @@ const Navbar = () => {
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const refreshAuthState = () => {
     const authToken = localStorage.getItem('bitezAuthToken');
@@ -136,6 +137,7 @@ const Navbar = () => {
   const navLinks = [
     { label: 'Home', path: '/', icon: <Home size={18} /> },
     { label: 'About', path: '/about', icon: <Home size={18} /> },
+    { label: 'How It Works', path: '/about#how-it-works', icon: <Home size={18} /> },
   ];
 
   const studentLinks = [
@@ -168,34 +170,47 @@ const Navbar = () => {
           {/* Logo */}
           <motion.div
             onClick={() => { navigate('/'); setMobileOpen(false); }}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.08, rotate: -2 }}
             whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             className="cursor-pointer flex items-center"
           >
-            <img src="/bitez-logo.svg" alt="Bitez" className="h-9 md:h-10 w-auto" />
+            <motion.img
+              src="/bitez-logo.svg"
+              alt="Bitez"
+              className="h-8 md:h-9 w-auto"
+              animate={{ rotate: [0, -3, 3, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            />
           </motion.div>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.path}
-                onClick={() => navigate(link.path)}
-                className="text-slate-600 font-semibold hover:text-orange-600 transition cursor-pointer"
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.path || (link.path.includes('#') && location.pathname === link.path.split('#')[0]);
+              return (
+                <a
+                  key={link.path}
+                  onClick={() => navigate(link.path)}
+                  className={`relative text-slate-600 font-semibold hover:text-orange-600 transition cursor-pointer ${isActive ? 'text-orange-600' : ''}`}
+                >
+                  {link.label}
+                  {isActive && <motion.div layoutId="activeNav" className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-orange-500 rounded-full" />}
+                </a>
+              );
+            })}
 
             {!isLoggedIn ? (
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/auth')}
-                className="bg-slate-900 text-white px-6 py-2.5 rounded-full font-bold hover:bg-slate-800 transition shadow-lg hover:shadow-xl"
-              >
-                Log In
-              </motion.button>
+              <>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate('/auth')}
+                  className="bg-gradient-to-r from-orange-500 to-rose-500 text-white px-6 py-2.5 rounded-full font-bold text-sm hover:shadow-lg hover:shadow-orange-500/25 transition"
+                >
+                  Order Now
+                </motion.button>
+              </>
             ) : (
               <div className="relative" ref={dropdownRef}>
                 <motion.button
@@ -206,7 +221,7 @@ const Navbar = () => {
                   <div className="bg-orange-100 p-1 rounded-full text-orange-600">
                     <User size={16} />
                   </div>
-                  <span className="hidden lg:inline">Account</span>
+                  <span className="hidden lg:inline">{userName || 'Account'}</span>
                   <ChevronDown size={14} className={`transition-transform text-slate-400 group-hover:text-orange-500 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                 </motion.button>
 
@@ -272,7 +287,7 @@ const Navbar = () => {
             transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="fixed inset-x-0 top-[60px] z-40 md:hidden"
           >
-            <div className="mx-4 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
+              <div className="mx-4 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
               {isLoggedIn && (
                 <div className="px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-orange-50 to-rose-50">
                   <p className="font-bold text-slate-800 text-lg">{userName}</p>
@@ -281,29 +296,38 @@ const Navbar = () => {
               )}
 
               <div className="py-2">
-                {navLinks.map((link) => (
-                  <button
-                    key={link.path}
-                    onClick={() => { navigate(link.path); setMobileOpen(false); }}
-                    className="w-full flex items-center gap-3 px-5 py-3.5 text-slate-700 hover:bg-orange-50 transition font-medium"
-                  >
-                    {link.icon}
-                    {link.label}
-                  </button>
-                ))}
+                {navLinks.map((link, i) => {
+                  const isActive = location.pathname === link.path || (link.path.includes('#') && location.pathname === link.path.split('#')[0]);
+                  return (
+                    <motion.button
+                      key={link.path}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.06 }}
+                      onClick={() => { navigate(link.path); setMobileOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-5 py-4 text-base font-semibold transition rounded-xl mx-1 ${isActive ? 'text-orange-600 bg-orange-50' : 'text-slate-700 hover:bg-orange-50'}`}
+                    >
+                      {link.icon}
+                      {link.label}
+                    </motion.button>
+                  );
+                })}
 
                 {isLoggedIn && (
                   <>
                     <div className="border-t border-slate-100 my-1" />
-                    {userLinks.map((link) => (
-                      <button
+                    {userLinks.map((link, i) => (
+                      <motion.button
                         key={link.path}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: (navLinks.length + i) * 0.06 }}
                         onClick={() => { navigate(link.path); setMobileOpen(false); }}
-                        className="w-full flex items-center gap-3 px-5 py-3.5 text-slate-700 hover:bg-orange-50 transition font-medium"
+                        className="w-full flex items-center gap-3 px-5 py-4 text-base text-slate-700 hover:bg-orange-50 transition font-semibold"
                       >
                         <span className="text-orange-600">{link.icon}</span>
                         {link.label}
-                      </button>
+                      </motion.button>
                     ))}
                     <div className="border-t border-slate-100 my-1" />
                     <button
@@ -319,12 +343,14 @@ const Navbar = () => {
                 {!isLoggedIn && (
                   <>
                     <div className="border-t border-slate-100 my-1" />
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => { navigate('/auth'); setMobileOpen(false); }}
                       className="w-full mx-5 my-2 bg-gradient-to-r from-orange-500 to-rose-500 text-white py-3 rounded-xl font-bold text-center hover:from-orange-600 hover:to-rose-600 transition shadow-lg"
                     >
-                      Get Started
-                    </button>
+                      Order Now
+                    </motion.button>
                   </>
                 )}
               </div>

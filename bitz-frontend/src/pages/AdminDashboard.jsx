@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Store, LogOut, Clock, CheckCircle, XCircle, Package, DollarSign,
   Users, ChevronDown, Settings, BarChart2, Plus, Trash2, ToggleLeft,
-  ToggleRight, MapPin, Phone, Mail, UtensilsCrossed, AlertCircle
+  ToggleRight, MapPin, Phone, Mail, UtensilsCrossed, AlertCircle, Image, Pencil
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,7 +13,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [canteenData, setCanteenData] = useState(null);
   const [canteenForm, setCanteenForm] = useState({ name: '', location: '', timings: '', contactPhone: '', contactEmail: '' });
-  const [menuDraft, setMenuDraft] = useState({ name: '', price: '', category: '', available: true });
+  const [menuDraft, setMenuDraft] = useState({ name: '', price: '', category: '', available: true, imageUrl: '' });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -21,6 +21,8 @@ const AdminDashboard = () => {
   const [showAccountMenu, setShowAccountMenu] = useState(false);
   const [activeTab, setActiveTab] = useState('orders');
   const [stats, setStats] = useState({ pending: 0, preparing: 0, ready: 0, completed: 0, todayRevenue: 0, totalOrders: 0 });
+  const [editingImageUrl, setEditingImageUrl] = useState(null);
+  const [editImageUrlValue, setEditImageUrlValue] = useState('');
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -71,7 +73,7 @@ const AdminDashboard = () => {
     try {
       const response = await api.addMenuItem({ ...menuDraft, price: Number(menuDraft.price) });
       setCanteenData(response.canteen);
-      setMenuDraft({ name: '', price: '', category: '', available: true });
+      setMenuDraft({ name: '', price: '', category: '', available: true, imageUrl: '' });
       setMessage('Menu item added.');
     } catch (err) { setError(err.message); } finally { setIsSaving(false); }
   };
@@ -88,6 +90,14 @@ const AdminDashboard = () => {
     setMessage(''); setError('');
     try {
       const response = await api.deleteMenuItem(itemId);
+      setCanteenData(response.canteen);
+    } catch (err) { setError(err.message); }
+  };
+
+  const handleUpdateImageUrl = async (itemId, imageUrl) => {
+    setMessage(''); setError('');
+    try {
+      const response = await api.updateMenuItem(itemId, { imageUrl });
       setCanteenData(response.canteen);
     } catch (err) { setError(err.message); }
   };
@@ -343,6 +353,17 @@ const AdminDashboard = () => {
                     <div className="space-y-3">
                       <input className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none" placeholder="Item name" value={menuDraft.name} onChange={e => setMenuDraft({ ...menuDraft, name: e.target.value })} />
                       <input className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none" placeholder="Category" value={menuDraft.category} onChange={e => setMenuDraft({ ...menuDraft, category: e.target.value })} />
+                      <div>
+                        <label className="flex items-center text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 gap-1.5">
+                          <Image size={12} /> Image URL (optional)
+                        </label>
+                        <input 
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none" 
+                          placeholder="https://example.com/food.jpg" 
+                          value={menuDraft.imageUrl || ''} 
+                          onChange={e => setMenuDraft({ ...menuDraft, imageUrl: e.target.value })} 
+                        />
+                      </div>
                       <div className="relative">
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">₹</span>
                         <input type="number" className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none" placeholder="Price" value={menuDraft.price} onChange={e => setMenuDraft({ ...menuDraft, price: e.target.value })} />
@@ -364,6 +385,11 @@ const AdminDashboard = () => {
                     <div className="grid md:grid-cols-2 gap-4">
                       {canteenData.menuItems.map((item, idx) => (
                         <motion.div key={item._id} layout initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * idx }} whileHover={{ y: -2 }} className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+                          {item.imageUrl && (
+                            <div className="w-full h-32 rounded-xl overflow-hidden mb-3 bg-slate-100">
+                              <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                            </div>
+                          )}
                           <div className="flex justify-between items-start mb-3">
                             <div>
                               <p className="font-black text-lg text-slate-800">{item.name}</p>
@@ -371,6 +397,19 @@ const AdminDashboard = () => {
                             </div>
                             <span className="text-2xl font-black text-orange-600">₹{item.price}</span>
                           </div>
+                          {editingImageUrl === item._id ? (
+                            <div className="flex gap-2 mb-3">
+                              <input className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none" placeholder="Image URL" value={editImageUrlValue} onChange={e => setEditImageUrlValue(e.target.value)} />
+                              <button onClick={async () => { await handleUpdateImageUrl(item._id, editImageUrlValue); setEditingImageUrl(null); }} className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 transition-colors">Save</button>
+                              <button onClick={() => setEditingImageUrl(null)} className="px-3 py-2 rounded-xl text-xs font-bold bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 transition-colors">Cancel</button>
+                            </div>
+                          ) : (
+                            <div className="flex gap-2 mb-3">
+                              <button onClick={() => { setEditingImageUrl(item._id); setEditImageUrlValue(item.imageUrl || ''); }} className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-500 hover:text-orange-600 hover:border-orange-200 hover:bg-orange-50 transition-colors">
+                                <Pencil size={12} /> {item.imageUrl ? 'Edit Image' : 'Add Image'}
+                              </button>
+                            </div>
+                          )}
                           <div className="flex gap-2">
                             <button onClick={() => handleToggleAvailability(item)} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold border transition-colors ${item.available ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100'}`}>
                               {item.available ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
