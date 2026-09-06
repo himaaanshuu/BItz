@@ -1,7 +1,10 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
 import connectDB from "./config/db.js";
+import User from "./models/User.js";
+import Canteen from "./models/Canteen.js";
 import authRoutes from "./routes/auth.js";
 import canteenRoutes from "./routes/canteens.js";
 import paymentRoutes, { stripeWebhook } from "./routes/payments.js";
@@ -70,6 +73,62 @@ app.use("/api/orders", orderRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
+app.get("/api/seed", async (req, res) => {
+  try {
+    const existingAdmin = await User.findOne({ email: 'himanshu2005gupta@gmail.com' });
+    if (existingAdmin) {
+      return res.json({ message: 'Database already seeded.', admin: existingAdmin.email });
+    }
+
+    const hashedPassword = await bcrypt.hash('Hg28@2005', 10);
+    const admin = await User.create({
+      name: 'Himanshu Gupta',
+      email: 'himanshu2005gupta@gmail.com',
+      phone: '+917982100712',
+      password: hashedPassword,
+      role: 'admin',
+      lastLoginAt: new Date(),
+    });
+
+    await User.create({
+      name: 'Priya Patel',
+      email: 'student@bitez.com',
+      phone: '+919876543211',
+      role: 'student',
+    });
+
+    await Canteen.create({
+      ownerId: admin._id,
+      name: 'Campus Food Court',
+      location: 'Ground Floor, Main Building',
+      timings: '8:00 AM - 8:00 PM',
+      contactPhone: '+917982100712',
+      contactEmail: 'himanshu2005gupta@gmail.com',
+      menuItems: [
+        { name: 'Veg Burger', price: 60, category: 'Burgers', available: true },
+        { name: 'Chicken Burger', price: 80, category: 'Burgers', available: true },
+        { name: 'Paneer Tikka Pizza', price: 120, category: 'Pizza', available: true },
+        { name: 'Margherita Pizza', price: 100, category: 'Pizza', available: true },
+        { name: 'Cold Coffee', price: 50, category: 'Beverages', available: true },
+        { name: 'Masala Chai', price: 20, category: 'Beverages', available: true },
+        { name: 'Fresh Lime Soda', price: 30, category: 'Beverages', available: true },
+        { name: 'Samosa (2 pcs)', price: 25, category: 'Snacks', available: true },
+        { name: 'French Fries', price: 45, category: 'Snacks', available: true },
+        { name: 'Veg Fried Rice', price: 70, category: 'Main Course', available: true },
+        { name: 'Paneer Butter Masala', price: 90, category: 'Main Course', available: true },
+        { name: 'Dal Fry', price: 55, category: 'Main Course', available: true },
+        { name: 'Jeera Rice', price: 50, category: 'Main Course', available: true },
+        { name: 'Gulab Jamun (2 pcs)', price: 35, category: 'Desserts', available: true },
+        { name: 'Chocolate Brownie', price: 55, category: 'Desserts', available: true },
+      ],
+    });
+
+    res.json({ message: 'Database seeded successfully!', admin: admin.email });
+  } catch (error) {
+    res.status(500).json({ message: 'Seed failed', error: error.message });
+  }
 });
 
 app.use('/api/*', (req, res) => {
