@@ -1,3 +1,5 @@
+import fetch from 'node-fetch';
+
 export const sendOtpSms = async ({ to, otp }) => {
   const authKey = process.env.MSG91_AUTH_KEY;
   const serviceId = process.env.MSG91_SERVICE_ID;
