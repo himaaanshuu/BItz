@@ -79,14 +79,14 @@ app.get("/api/seed", async (req, res) => {
   try {
     const existingAdmin = await User.findOne({ email: 'himanshu2005gupta@gmail.com' });
     if (existingAdmin) {
-      const updates = {};
-      if (!existingAdmin.phone) updates.phone = '+917982100712';
-      if (!existingAdmin.password) updates.password = await bcrypt.hash('Hg28@2005', 10);
-      if (Object.keys(updates).length > 0) {
-        await User.updateOne({ _id: existingAdmin._id }, { $set: updates });
-        return res.json({ message: 'Database updated: fixed missing fields.', admin: existingAdmin.email });
-      }
-      return res.json({ message: 'Database already seeded.', admin: existingAdmin.email });
+      const hashedPassword = await bcrypt.hash('Hg28@2005', 10);
+      await User.updateOne({ _id: existingAdmin._id }, { $set: {
+        phone: '+917982100712',
+        password: hashedPassword,
+        name: 'Himanshu Gupta',
+        role: 'admin',
+      }});
+      return res.json({ message: 'Admin updated.', admin: existingAdmin.email, phone: '+917982100712' });
     }
 
     const hashedPassword = await bcrypt.hash('Hg28@2005', 10);
