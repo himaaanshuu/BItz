@@ -28,7 +28,7 @@ const Footer = () => {
                 {[
                   { to: '/', label: 'Home' },
                   { to: '/about', label: 'About' },
-                  { to: '/auth', label: 'Student Login' },
+                  { to: '/student-login', label: 'Student Login' },
                   { to: '/admin-login', label: 'Admin Login' },
                 ].map((link) => (
                   <motion.div key={link.to} whileHover={{ x: 4 }}>

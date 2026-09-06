@@ -201,16 +201,24 @@ const Navbar = () => {
             })}
 
             {!isLoggedIn ? (
-              <>
+              <div className="flex items-center gap-3">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => navigate('/auth')}
+                  onClick={() => navigate('/admin-login')}
+                  className="text-slate-500 hover:text-orange-600 font-bold text-sm transition"
+                >
+                  Admin
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate('/student-login')}
                   className="bg-gradient-to-r from-orange-500 to-rose-500 text-white px-6 py-2.5 rounded-full font-bold text-sm hover:shadow-lg hover:shadow-orange-500/25 transition"
                 >
-                  Order Now
+                  Student Login
                 </motion.button>
-              </>
+              </div>
             ) : (
               <div className="relative" ref={dropdownRef}>
                 <motion.button
@@ -346,10 +354,18 @@ const Navbar = () => {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => { navigate('/auth'); setMobileOpen(false); }}
+                      onClick={() => { navigate('/student-login'); setMobileOpen(false); }}
                       className="w-full mx-5 my-2 bg-gradient-to-r from-orange-500 to-rose-500 text-white py-3 rounded-xl font-bold text-center hover:from-orange-600 hover:to-rose-600 transition shadow-lg"
                     >
-                      Order Now
+                      Student Login
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => { navigate('/admin-login'); setMobileOpen(false); }}
+                      className="w-full mx-5 mb-2 bg-slate-900 text-white py-3 rounded-xl font-bold text-center hover:bg-slate-800 transition shadow-lg"
+                    >
+                      Admin Login
                     </motion.button>
                   </>
                 )}

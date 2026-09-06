@@ -82,7 +82,7 @@ const StudentDashboard = () => {
           </div>
           <p className="text-2xl font-black text-slate-800 mb-2">Access Denied</p>
           <p className="text-slate-500 font-medium border-b border-slate-200 pb-6 mb-6">You need to log in to view this page.</p>
-          <button onClick={() => navigate('/auth')} className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition shadow-lg w-full">
+          <button onClick={() => navigate('/student-login')} className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition shadow-lg w-full">
             Log In Now
           </button>
         </motion.div>

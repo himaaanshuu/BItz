@@ -77,7 +77,7 @@ const Home = () => {
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/student-login')}
                 className="group flex items-center justify-center gap-3 bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-slate-800 transition shadow-xl shadow-slate-900/20 hover:shadow-2xl"
               >
                 Get Started
@@ -164,7 +164,7 @@ const Home = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/student-login')}
                 className="bg-white text-orange-600 px-10 py-5 rounded-full font-black text-xl hover:bg-orange-50 transition-colors shadow-2xl"
               >
                 Get Started Free
