@@ -85,7 +85,7 @@ const AdminSettings = () => {
   const canteenFields = [
     { key: 'canteenName', label: 'Canteen Name', icon: Building2, placeholder: 'Main Cafeteria', type: 'text' },
     { key: 'location', label: 'Location', icon: MapPin, placeholder: 'Ground Floor, Building A', type: 'text' },
-    { key: 'phone', label: 'Phone Number', icon: Phone, placeholder: '+91 98765 43210', type: 'tel' },
+    { key: 'phone', label: 'Phone Number', icon: Phone, placeholder: '+91 XXXXX XXXXX', type: 'tel' },
     { key: 'email', label: 'Email Address', icon: Mail, placeholder: 'admin@canteen.com', type: 'email' },
   ];
 

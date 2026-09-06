@@ -121,9 +121,9 @@ const Privacy = () => {
             <p className="text-slate-600 text-lg font-medium mb-6 relative z-10">
               If you have any questions about this Privacy Policy, please reach out.
             </p>
-             <a href="mailto:privacy@bitez.com" className="bg-white text-orange-600 px-8 py-4 rounded-2xl font-black shadow-lg hover:-translate-y-1 transition-transform relative z-10 hover:shadow-orange-200">
-                privacy@bitez.com
-             </a>
+              <a href="mailto:himanshu@bitez-theta.vercel.app" className="bg-white text-orange-600 px-8 py-4 rounded-2xl font-black shadow-lg hover:-translate-y-1 transition-transform relative z-10 hover:shadow-orange-200">
+                 himanshu@bitez-theta.vercel.app
+              </a>
           </div>
         </div>
       </div>

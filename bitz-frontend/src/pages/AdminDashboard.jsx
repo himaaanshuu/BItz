@@ -458,7 +458,7 @@ const AdminDashboard = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="flex items-center text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 gap-1.5"><Phone size={12} /> Contact Phone</label>
-                        <input className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none" placeholder="+91 98765 43210" value={canteenForm.contactPhone} onChange={e => handleCanteenChange('contactPhone', e.target.value)} />
+                        <input className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none" placeholder="+91 XXXXX XXXXX" value={canteenForm.contactPhone} onChange={e => handleCanteenChange('contactPhone', e.target.value)} />
                       </div>
                       <div>
                         <label className="flex items-center text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 gap-1.5"><Mail size={12} /> Contact Email</label>

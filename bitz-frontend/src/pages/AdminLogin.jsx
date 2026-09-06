@@ -327,12 +327,7 @@ const AdminLogin = () => {
             </div>
 
             <div className="mt-8 pt-6 border-t border-slate-100 text-center">
-              <p className="text-xs font-semibold text-slate-400 mb-3">Demo Credentials</p>
-              <div className="bg-slate-50 rounded-xl p-3 text-xs font-mono text-slate-600 space-y-1">
-                <p>Email: <span className="font-bold text-slate-800">admin@bitez.com</span></p>
-                <p>Password: <span className="font-bold text-slate-800">Admin@123!</span></p>
-                <p className="text-slate-400 mt-2">Click "Login with Password" to sign in directly</p>
-              </div>
+              <p className="text-xs font-semibold text-slate-400">Use your admin credentials to sign in</p>
             </div>
           </motion.div>
         </div>

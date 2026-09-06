@@ -11,10 +11,10 @@ if (result.error) {
 }
 
 const DEMO_ADMIN = {
-  name: 'Rahul Sharma',
-  email: 'admin@bitez.com',
-  phone: '+919876543210',
-  password: 'Admin@123!',
+  name: 'Himanshu',
+  email: 'himanshu2005gupta@gmail.com',
+  phone: '+917982100712',
+  password: 'Hg28@2005',
 };
 
 const DEMO_STUDENT = {
@@ -28,8 +28,8 @@ const DEMO_CANTEEN = {
   name: 'Campus Food Court',
   location: 'Ground Floor, Main Building',
   timings: '8:00 AM - 8:00 PM',
-  contactPhone: '+919876543210',
-  contactEmail: 'admin@bitez.com',
+  contactPhone: '+917982100712',
+  contactEmail: 'himanshu2005gupta@gmail.com',
   menuItems: [
     { name: 'Veg Burger', price: 60, category: 'Burgers', available: true },
     { name: 'Chicken Burger', price: 80, category: 'Burgers', available: true },

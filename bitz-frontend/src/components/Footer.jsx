@@ -70,8 +70,7 @@ const Footer = () => {
             <div>
               <h4 className="font-bold text-lg mb-4 text-orange-500">Contact</h4>
               <div className="space-y-2 text-gray-400">
-                <p>support@bitez.com</p>
-                <p>+91 98765 43210</p>
+                <p>himanshu@bitez-theta.vercel.app</p>
               </div>
             </div>
           </ScrollReveal>
