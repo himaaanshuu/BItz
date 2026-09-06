@@ -79,7 +79,7 @@ const PhoneInput = ({ value, onChange, disabled, placeholder = 'Phone number' })
     onChange(selected.dial + raw);
   };
 
-  const displayNumber = value.replace(/^\+\d+\s*/, '');
+  const displayNumber = value.startsWith(selected.dial) ? value.slice(selected.dial.length) : value.replace(/^\+\d{1,4}/, '');
 
   return (
     <div className="relative flex w-full" ref={dropdownRef}>
