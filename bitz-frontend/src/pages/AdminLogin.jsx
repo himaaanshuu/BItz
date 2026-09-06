@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Store, ChevronRight, Eye, EyeOff, ShieldCheck, BarChart3, Users, Clock } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import PhoneInput from '../components/PhoneInput';
 import { api } from '../services/api';
 import ScrollReveal from '../components/ScrollReveal';
 
@@ -237,12 +238,11 @@ const AdminLogin = () => {
                 className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl font-medium focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all shadow-sm disabled:opacity-50"
               />
 
-              <input
-                placeholder="Phone (e.g. +911234567890)"
+              <PhoneInput
                 value={phone}
-                onChange={e => setPhone(e.target.value)}
-                onBlur={e => setPhone(normalizePhone(e.target.value))}
-                className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl font-medium focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all shadow-sm disabled:opacity-50"
+                onChange={setPhone}
+                disabled={otpRequested}
+                placeholder="Phone number"
               />
 
               <div className="relative group">

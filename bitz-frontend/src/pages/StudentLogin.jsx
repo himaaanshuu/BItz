@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { User, ChevronRight, ShieldCheck, Zap, MapPin, CreditCard } from 'lucide-react';
 import { api } from '../services/api';
 import { GoogleLogin } from '@react-oauth/google';
+import PhoneInput from '../components/PhoneInput';
 import ScrollReveal from '../components/ScrollReveal';
 
 const StudentLogin = () => {
@@ -279,20 +280,12 @@ const StudentLogin = () => {
                 </>
               )}
 
-              <div className="relative group">
-                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-focus-within:text-orange-500 transition-colors">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                </span>
-                <input
-                  type="tel"
-                  placeholder="Phone Number"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  onBlur={(e) => setPhone(normalizePhone(e.target.value))}
-                  disabled={otpRequested}
-                  className="w-full pl-12 pr-5 py-3.5 bg-white border border-slate-200 rounded-2xl font-medium focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all shadow-sm disabled:opacity-50 disabled:bg-slate-50"
-                />
-              </div>
+              <PhoneInput
+                value={phone}
+                onChange={setPhone}
+                disabled={otpRequested}
+                placeholder="Phone number"
+              />
 
               <div className="space-y-3">
                 {!otpRequested ? (
