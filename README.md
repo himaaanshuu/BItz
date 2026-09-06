@@ -1,7 +1,15 @@
-
 # Bitez
 
 A modern campus food ordering platform that lets students skip the queue and order ahead. Built with Vite + React frontend and Express + MongoDB backend.
+
+---
+
+## Live Links
+
+| Service | URL |
+|---------|-----|
+| Frontend | [https://bitez-theta.vercel.app](https://bitez-theta.vercel.app) |
+| Backend API | [https://bitz-backend.onrender.com](https://bitz-backend.onrender.com) |
 
 ---
 
@@ -13,13 +21,17 @@ Bitez connects campus canteens with students through a seamless digital ordering
 
 ## Features
 
-- **Student Authentication** - Phone OTP and Google OAuth login
+- **Student Auth** - Phone OTP login + Google OAuth
+- **Admin Auth** - Email + password + mandatory OTP (two-factor)
 - **Admin Dashboard** - Real-time order management, menu CRUD, analytics
 - **Live Order Tracking** - Students see preparation status in real-time
-- **Menu Management** - Canteen admins add, edit, toggle availability of items
+- **Menu Management** - Canteen admins add, edit, toggle availability with image URLs
+- **Session Expiry** - 3-day sessions with 3-hour warning popup
 - **Responsive Design** - Works on desktop, tablet, and mobile
 - **Scroll Animations** - Framer Motion powered page transitions and reveals
-- **Docker Support** - Full containerization for local development
+- **Phone Input** - Country code dropdown with 30+ countries
+- **SMS OTP** - Twilio Messaging Service for production SMS delivery
+- **Favicon** - Bitez logo as browser favicon with SEO meta tags
 
 ---
 
@@ -27,11 +39,12 @@ Bitez connects campus canteens with students through a seamless digital ordering
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React 18, Vite, Tailwind CSS, Framer Motion |
-| Backend | Node.js, Express, Mongoose |
-| Database | MongoDB (local or Atlas) |
-| Auth | JWT, OTP, Google OAuth |
-| Deployment | Vercel (frontend), Railway/Render (backend) |
+| Frontend | React 18, Vite, Tailwind CSS, Framer Motion, Lucide React |
+| Backend | Node.js, Express, Mongoose, bcryptjs |
+| Database | MongoDB Atlas |
+| Auth | JWT (3-day expiry), Phone OTP, Google OAuth |
+| SMS | Twilio Messaging Service |
+| Deployment | Vercel (frontend), Render (backend) |
 
 ---
 
@@ -39,21 +52,21 @@ Bitez connects campus canteens with students through a seamless digital ordering
 
 ```
 Bitez/
-  bitz-frontend/          # Vite + React SPA
+  bitz-frontend/              # Vite + React SPA
     src/
-      components/         # Navbar, Footer, ScrollReveal, AnimatedBanner
-      pages/              # Home, About, Auth, Dashboard, Profile, etc.
-      services/           # API client
-    public/               # Static assets (logo, hero image)
-    vercel.json           # Vercel SPA rewrite rules
+      components/             # Navbar, Footer, PhoneInput, ScrollReveal, SessionExpiryAlert
+      pages/                  # Home, About, Auth, Dashboard, Profile, Orders
+      services/               # API client (api.js)
+    public/                   # Static assets (logo, favicon)
+    vercel.json               # SPA rewrite rules
 
-  bitz-backend/           # Express + MongoDB API
+  bitz-backend/               # Express + MongoDB API
     src/
-      models/             # User, Canteen, Order, Otp
-      routes/             # auth, canteens, orders, payments
-      seed/               # Demo data seeding scripts
-      middleware/          # Auth, role, rate limiting
-    Dockerfile
+      models/                 # User, Canteen, Order, Otp
+      routes/                 # auth, canteens, orders, payments
+      seed/                   # Database seeding scripts
+      middleware/              # Auth, role, rate limiting
+      utils/                  # OTP generation, SMS notification, validation
 ```
 
 ---
@@ -64,18 +77,18 @@ Bitez/
 
 - Node.js 18+
 - npm
-- MongoDB (local or Atlas)
+- MongoDB Atlas account (or local MongoDB)
 
 ### 1. Clone and Install
 
 ```bash
-git clone https://github.com/himaaanshuu/Bitez.git
-cd Bitez
+git clone https://github.com/himaaanshuu/BItz.git
+cd BItz
 
-# Install backend dependencies
+# Install backend
 cd bitz-backend && npm install
 
-# Install frontend dependencies
+# Install frontend
 cd ../bitz-frontend && npm install
 ```
 
@@ -85,31 +98,60 @@ Create `bitz-backend/.env`:
 
 ```env
 PORT=5001
-MONGODB_URI=mongodb://localhost:27017/bitz
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/bitz?retryWrites=true&w=1
 JWT_SECRET=your_secret_key_at_least_32_chars
-CLIENT_ORIGIN=http://localhost:3000
+CLIENT_ORIGIN=http://localhost:3000,http://localhost:5173
+NODE_ENV=development
+
+# Twilio (for SMS OTP)
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=your_auth_token
+TWILIO_MESSAGING_SERVICE_SID=MGxxxxxxxxxxxxxxx
 ```
 
-### 3. Seed Demo Data
+Create `bitz-frontend/.env`:
+
+```env
+VITE_API_URL=http://localhost:5001/api
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+```
+
+### 3. Seed Database
 
 ```bash
 cd bitz-backend
 npm run seed:all
 ```
 
-This creates:
-- Admin: `admin@bitez.com` / `Admin@123!`
-- Student: `student@bitez.com` / `Student@123!`
-- Canteen with 15 menu items
-
 ### 4. Start Development
 
 ```bash
-# From root
-npm run dev
+# Terminal 1 - Backend
+cd bitz-backend && npm run dev
+
+# Terminal 2 - Frontend
+cd bitz-frontend && npm run dev
 ```
 
-Frontend runs on `http://localhost:3000`, backend on `http://localhost:5001`.
+Frontend: `http://localhost:3000` | Backend: `http://localhost:5001`
+
+---
+
+## Production Credentials
+
+### Admin Login
+
+| Field | Value |
+|-------|-------|
+| Email | `himanshu2005gupta@gmail.com` |
+| Phone | `+917982100712` |
+| Password | `Hg28@2005` |
+
+Admin login requires **email + password + OTP** (mandatory two-factor auth).
+
+### Student Login
+
+Students log in with **phone number + OTP** (sent via SMS).
 
 ---
 
@@ -120,13 +162,14 @@ Frontend runs on `http://localhost:3000`, backend on `http://localhost:5001`.
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/auth/student/register` | Register student |
-| POST | `/api/auth/student/request-otp` | Request OTP (phone) |
-| POST | `/api/auth/student/login` | Login with OTP |
+| POST | `/api/auth/student/request-otp` | Request student OTP (phone) |
+| POST | `/api/auth/student/login` | Student login (phone + OTP) |
 | POST | `/api/auth/student/google` | Google OAuth login |
-| POST | `/api/auth/admin/request-otp` | Request admin OTP |
+| POST | `/api/auth/admin/request-otp` | Request admin OTP (email + phone) |
 | POST | `/api/auth/admin/login` | Admin login (email + password + OTP) |
 | POST | `/api/auth/change-password` | Change admin password |
-| GET | `/api/auth/me` | Get current user |
+| GET | `/api/auth/me` | Get current user profile |
+| GET | `/api/seed` | Seed database (one-time) |
 
 ### Canteens
 
@@ -136,7 +179,7 @@ Frontend runs on `http://localhost:3000`, backend on `http://localhost:5001`.
 | GET | `/api/canteens/me` | Admin | Get admin's canteen |
 | POST | `/api/canteens/me` | Admin | Create canteen |
 | PUT | `/api/canteens/me` | Admin | Update canteen |
-| POST | `/api/canteens/me/menu` | Admin | Add menu item |
+| POST | `/api/canteens/me/menu` | Admin | Add menu item (with image URL) |
 | PUT | `/api/canteens/me/menu/:id` | Admin | Update menu item |
 | DELETE | `/api/canteens/me/menu/:id` | Admin | Delete menu item |
 
@@ -146,6 +189,8 @@ Frontend runs on `http://localhost:3000`, backend on `http://localhost:5001`.
 |--------|----------|------|-------------|
 | POST | `/api/orders` | Student | Create order |
 | GET | `/api/orders/me` | Student | Get my orders |
+| GET | `/api/orders/admin/all` | Admin | Get all orders |
+| PUT | `/api/orders/:id/status` | Admin | Update order status |
 
 ---
 
@@ -154,63 +199,27 @@ Frontend runs on `http://localhost:3000`, backend on `http://localhost:5001`.
 ### Frontend (Vercel)
 
 1. Push to GitHub
-2. Import repository on Vercel
-3. Set root directory to `bitz-frontend`
-4. Set environment variables:
-   - `VITE_API_URL` - Your production backend URL
-   - `VITE_GOOGLE_CLIENT_ID` - Google OAuth client ID
-5. Deploy
+2. Import on Vercel with root directory `bitz-frontend`
+3. Set env vars:
+   - `VITE_API_URL` = `https://bitz-backend.onrender.com/api`
+   - `VITE_GOOGLE_CLIENT_ID` = your Google OAuth client ID
+4. Deploy
 
-### Backend (Railway / Render)
+### Backend (Render)
 
-1. Create a new project on Railway or Render
-2. Connect your GitHub repository
-3. Set root directory to `bitz-backend`
-4. Set environment variables:
-   - `MONGODB_URI` - MongoDB Atlas connection string
-   - `JWT_SECRET` - Secure random string (32+ chars)
-   - `CLIENT_ORIGIN` - Your Vercel frontend URL
-   - `NODE_ENV` - production
-5. Deploy
-
----
-
-## What's Next (v2 Roadmap)
-
-Planned features and improvements for the next version:
-
-| Feature | Priority | Status |
-|---------|----------|--------|
-| Real-time order updates via WebSocket | High | Planned |
-| Push notifications for order status | High | Planned |
-| Payment integration (UPI + Stripe) | High | Planned |
-| Cart persistence across sessions | Medium | In Progress |
-| Order history with reorder functionality | Medium | Planned |
-| Canteen analytics dashboard (charts) | Medium | Planned |
-| Multi-canteen support per admin | Low | Planned |
-| Student wallet and loyalty points | Low | Planned |
-| SMS/WhatsApp order notifications | Low | Planned |
-| Admin mobile app (React Native) | Low | Planned |
-
----
-
-## Known Issues
-
-| Issue | Severity | Workaround |
-|-------|----------|------------|
-| OTP rate limiting not enforced | Medium | Avoid excessive requests in dev |
-| CORS issues in local dev | Low | Use Vite proxy or set CORS headers |
-| No input validation on some endpoints | Medium | Validate on client side |
-
----
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feat/your-feature`
-3. Make your changes and test
-4. Commit with a descriptive message
-5. Push and open a Pull Request
+1. Push to GitHub
+2. Create Web Service on Render with root directory `bitz-backend`
+3. Build: `npm install`
+4. Start: `node src/index.js`
+5. Set env vars:
+   - `NODE_ENV` = `production`
+   - `MONGODB_URI` = your MongoDB Atlas URI (use `w=1` not `w=majority`)
+   - `JWT_SECRET` = secure random string (32+ chars)
+   - `CLIENT_ORIGIN` = `https://bitez-theta.vercel.app`
+   - `TWILIO_ACCOUNT_SID` = your Twilio Account SID
+   - `TWILIO_AUTH_TOKEN` = your Twilio Auth Token
+   - `TWILIO_MESSAGING_SERVICE_SID` = your Twilio Messaging Service SID
+6. Seed database: visit `https://your-backend.onrender.com/api/seed`
 
 ---
 
