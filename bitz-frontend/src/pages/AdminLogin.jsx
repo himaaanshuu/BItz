@@ -70,8 +70,8 @@ const AdminLogin = () => {
     resetStatus();
     setOtpPreview('');
 
-    if (!email || !password || !otp) {
-      setError('Email, password, and OTP are required.');
+    if (!email || !password) {
+      setError('Email and password are required.');
       return;
     }
 
@@ -80,7 +80,7 @@ const AdminLogin = () => {
       const data = await api.loginAdmin({
         email: normalizeEmail(email),
         password,
-        otp,
+        otp: otp || '',
       });
       localStorage.setItem('bitezAuthToken', data.token);
       localStorage.setItem('bitezAdmin', JSON.stringify(data.user));
@@ -279,15 +279,26 @@ const AdminLogin = () => {
               </AnimatePresence>
 
               {!otpRequested ? (
-                <motion.button
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleRequestOtp}
-                  disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white py-3.5 rounded-2xl font-bold text-lg disabled:opacity-70 shadow-lg shadow-orange-500/25 hover:shadow-xl transition-all flex items-center justify-center gap-2"
-                >
-                  {isLoading ? 'Authenticating...' : 'Send OTP'} <ShieldCheck size={20} />
-                </motion.button>
+                <div className="space-y-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleRequestOtp}
+                    disabled={isLoading}
+                    className="w-full bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white py-3.5 rounded-2xl font-bold text-lg disabled:opacity-70 shadow-lg shadow-orange-500/25 hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                  >
+                    {isLoading ? 'Authenticating...' : 'Send OTP'} <ShieldCheck size={20} />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleLogin}
+                    disabled={isLoading || !email || !password}
+                    className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-2xl font-bold text-lg disabled:opacity-50 shadow-lg transition-all"
+                  >
+                    {isLoading ? 'Signing in...' : 'Login with Password'}
+                  </motion.button>
+                </div>
               ) : (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -320,7 +331,7 @@ const AdminLogin = () => {
               <div className="bg-slate-50 rounded-xl p-3 text-xs font-mono text-slate-600 space-y-1">
                 <p>Email: <span className="font-bold text-slate-800">admin@bitez.com</span></p>
                 <p>Password: <span className="font-bold text-slate-800">Admin@123!</span></p>
-                <p className="text-slate-400 mt-2">OTP will appear after clicking "Send OTP"</p>
+                <p className="text-slate-400 mt-2">Click "Login with Password" to sign in directly</p>
               </div>
             </div>
           </motion.div>

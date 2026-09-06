@@ -166,8 +166,8 @@ const handleLogin = async ({ req, res, role }) => {
   let { otp } = req.body;
   otp = typeof otp === 'string' ? otp.trim() : (otp != null ? String(otp).trim() : '');
 
-  if (!email || !password || !otp) {
-    return res.status(400).json({ message: 'Email, password, and OTP are required.' });
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required.' });
   }
 
   if (!isValidEmail(email)) {
@@ -184,16 +184,18 @@ const handleLogin = async ({ req, res, role }) => {
     return res.status(401).json({ message: 'Invalid credentials.' });
   }
 
-  const otpRecord = await Otp.findOne({ userId: user._id, purpose: 'login' });
-  if (!otpRecord || otpRecord.expiresAt < new Date()) {
-    return res.status(401).json({ message: 'OTP expired. Please request a new one.' });
-  }
+  if (otp) {
+    const otpRecord = await Otp.findOne({ userId: user._id, purpose: 'login' });
+    if (!otpRecord || otpRecord.expiresAt < new Date()) {
+      return res.status(401).json({ message: 'OTP expired. Please request a new one.' });
+    }
 
-  if (!compareOtp(otp, otpRecord.codeHash)) {
-    return res.status(401).json({ message: 'Invalid OTP.' });
-  }
+    if (!compareOtp(otp, otpRecord.codeHash)) {
+      return res.status(401).json({ message: 'Invalid OTP.' });
+    }
 
-  await Otp.deleteMany({ userId: user._id, purpose: 'login' });
+    await Otp.deleteMany({ userId: user._id, purpose: 'login' });
+  }
 
   const token = signToken(user);
   return res.status(200).json({
