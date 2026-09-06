@@ -8,6 +8,7 @@ import './App.css';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 import PageTransition from './components/PageTransition';
+import SessionExpiryAlert from './components/SessionExpiryAlert';
 
 // Pages
 import Home from './pages/Home';
@@ -183,6 +184,7 @@ function App() {
     <ErrorBoundary>
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || 'dummy-client-id.apps.googleusercontent.com'}>
         <Router>
+          <SessionExpiryAlert />
           <div className="min-h-screen">
             <AnimatedRoutes />
             <Footer />

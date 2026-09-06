@@ -19,7 +19,7 @@ const signToken = (user) => {
   return jwt.sign(
     { id: user._id, email: user.email, role: user.role },
     process.env.JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: '3d' }
   );
 };
 
@@ -49,6 +49,7 @@ router.post('/student/register', async (req, res) => {
       email,
       phone: normalizePhone(phone),
       role: 'student',
+      lastLoginAt: new Date(),
     });
 
     return res.status(201).json({
@@ -184,18 +185,24 @@ const handleLogin = async ({ req, res, role }) => {
     return res.status(401).json({ message: 'Invalid credentials.' });
   }
 
-  if (otp) {
+  // OTP is mandatory for admin, optional for other roles
+  if (role === 'admin') {
+    if (!otp) {
+      return res.status(400).json({ message: 'OTP is required for admin login.' });
+    }
     const otpRecord = await Otp.findOne({ userId: user._id, purpose: 'login' });
     if (!otpRecord || otpRecord.expiresAt < new Date()) {
       return res.status(401).json({ message: 'OTP expired. Please request a new one.' });
     }
-
     if (!compareOtp(otp, otpRecord.codeHash)) {
       return res.status(401).json({ message: 'Invalid OTP.' });
     }
-
     await Otp.deleteMany({ userId: user._id, purpose: 'login' });
   }
+
+  // Update last login timestamp
+  user.lastLoginAt = new Date();
+  await user.save();
 
   const token = signToken(user);
   return res.status(200).json({

@@ -72,7 +72,8 @@ const StudentLogin = () => {
       });
       localStorage.setItem('bitezAuthToken', data.token);
       localStorage.setItem('bitezUser', JSON.stringify(data.user));
-      document.cookie = 'bitezAuth=student; path=/; max-age=86400';
+      localStorage.setItem('bitezStudentLoginTime', Date.now().toString());
+      document.cookie = 'bitezAuth=student; path=/; max-age=259200';
       setMessage('Login successful. Redirecting...');
       navigate('/order');
     } catch (err) {
@@ -90,7 +91,8 @@ const StudentLogin = () => {
       const data = await api.loginStudentGoogle({ token: credentialResponse.credential });
       localStorage.setItem('bitezAuthToken', data.token);
       localStorage.setItem('bitezUser', JSON.stringify(data.user));
-      document.cookie = 'bitezAuth=student; path=/; max-age=86400';
+      localStorage.setItem('bitezStudentLoginTime', Date.now().toString());
+      document.cookie = 'bitezAuth=student; path=/; max-age=259200';
       setMessage('Login successful. Redirecting...');
       navigate('/order');
     } catch (err) {
