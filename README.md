@@ -32,6 +32,7 @@ Bitez connects campus canteens with students through a seamless digital ordering
 - **Phone Input** - Country code dropdown with 30+ countries
 - **SMS OTP** - Twilio Messaging Service for production SMS delivery
 - **Favicon** - Bitez logo as browser favicon with SEO meta tags
+- **Security** - JWT algorithm enforcement, server-side price validation, timing-safe OTP comparison, request size limits
 
 ---
 
