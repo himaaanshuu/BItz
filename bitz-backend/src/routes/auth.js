@@ -108,7 +108,7 @@ const handleOtpRequest = async ({ req, res, role }) => {
   }
 
   const otp = await requestOtpForUser({ user, email, phone });
-  const response = { message: 'OTP sent to email and phone.' };
+  const response = { message: 'OTP sent successfully.' };
   if (process.env.NODE_ENV !== 'production') {
     response.otp = otp;
   }
@@ -139,7 +139,7 @@ const handleStudentPhoneOtpRequest = async (req, res) => {
   }
 
   const otp = await requestOtpForUser({ user, email: user.email, phone: phoneNorm });
-  const response = { message: 'OTP sent to phone.' };
+  const response = { message: 'OTP sent successfully.' };
   if (process.env.NODE_ENV !== 'production') {
     response.otp = otp;
   }
