@@ -21,18 +21,41 @@ Bitez connects campus canteens with students through a seamless digital ordering
 
 ## Features
 
+### Core
 - **Student Auth** - Phone OTP login + Google OAuth
 - **Admin Auth** - Email + password + mandatory OTP (two-factor)
 - **Admin Dashboard** - Real-time order management, menu CRUD, analytics
 - **Live Order Tracking** - Students see preparation status in real-time
 - **Menu Management** - Canteen admins add, edit, toggle availability with image URLs
 - **Session Expiry** - 3-day sessions with 3-hour warning popup
-- **Responsive Design** - Works on desktop, tablet, and mobile
-- **Scroll Animations** - Framer Motion powered page transitions and reveals
-- **Phone Input** - Country code dropdown with 30+ countries
-- **SMS OTP** - Twilio Messaging Service for production SMS delivery
-- **Favicon** - Bitez logo as browser favicon with SEO meta tags
-- **Security** - JWT algorithm enforcement, server-side price validation, timing-safe OTP comparison, request size limits
+
+### Security
+- JWT algorithm enforcement (HS256 only)
+- Server-side order total computation
+- Canteen ownership check on order updates
+- Timing-safe OTP comparison
+- Request body size limits
+- Seed endpoint blocked in production
+
+### Legal & Compliance
+- **Privacy Policy** - Full legal content with 7 sections
+- **Terms & Conditions** - 6 sections covering user rights and responsibilities
+- **Cookie Consent Banner** - Accept/Decline with persistence
+
+### SEO & Performance
+- Meta titles, descriptions, canonical URLs
+- Open Graph / Twitter social preview images
+- Sitemap.xml and robots.txt
+- Force HTTPS with HSTS headers
+- Security headers (XSS, Clickjacking, MIME sniffing protection)
+
+### UX
+- Custom 404 page with animated design
+- Clear All Data section in admin settings
+- Country code dropdown for phone input (30+ countries)
+- Responsive design (desktop, tablet, mobile)
+- Scroll animations (Framer Motion)
+- Favicon and Bitez logo
 
 ---
 
@@ -55,11 +78,11 @@ Bitez connects campus canteens with students through a seamless digital ordering
 Bitez/
   bitz-frontend/              # Vite + React SPA
     src/
-      components/             # Navbar, Footer, PhoneInput, ScrollReveal, SessionExpiryAlert
-      pages/                  # Home, About, Auth, Dashboard, Profile, Orders
+      components/             # Navbar, Footer, PhoneInput, ScrollReveal, SessionExpiryAlert, CookieConsent, ClearAllSection
+      pages/                  # Home, About, Auth, Dashboard, Profile, Orders, Privacy, Terms, NotFound
       services/               # API client (api.js)
-    public/                   # Static assets (logo, favicon)
-    vercel.json               # SPA rewrite rules
+    public/                   # Static assets (logo, favicon, og-image, sitemap, robots.txt)
+    vercel.json               # SPA rewrite rules + security headers + HTTPS redirect
 
   bitz-backend/               # Express + MongoDB API
     src/
@@ -170,7 +193,7 @@ Students log in with **phone number + OTP** (sent via SMS).
 | POST | `/api/auth/admin/login` | Admin login (email + password + OTP) |
 | POST | `/api/auth/change-password` | Change admin password |
 | GET | `/api/auth/me` | Get current user profile |
-| GET | `/api/seed` | Seed database (one-time) |
+| GET | `/api/seed` | Seed database (blocked in production) |
 
 ### Canteens
 
@@ -188,10 +211,33 @@ Students log in with **phone number + OTP** (sent via SMS).
 
 | Method | Endpoint | Role | Description |
 |--------|----------|------|-------------|
-| POST | `/api/orders` | Student | Create order |
+| POST | `/api/orders` | Student | Create order (server-side total) |
 | GET | `/api/orders/me` | Student | Get my orders |
 | GET | `/api/orders/admin/all` | Admin | Get all orders |
-| PUT | `/api/orders/:id/status` | Admin | Update order status |
+| PUT | `/api/orders/:id/status` | Admin | Update order status (canteen ownership check) |
+
+---
+
+## Frontend Pages
+
+| Route | Page | Access |
+|-------|------|--------|
+| `/` | Home | Public |
+| `/about` | About | Public |
+| `/privacy` | Privacy Policy | Public |
+| `/terms` | Terms & Conditions | Public |
+| `/student-login` | Student Login | Public |
+| `/admin-login` | Admin Login | Public |
+| `/student-dashboard` | Student Dashboard | Student |
+| `/order` | Order Food | Student |
+| `/track` | Track Orders | Student |
+| `/order-history` | Order History | Student |
+| `/profile` | My Profile | Student |
+| `/current-order` | Live Order Tracker | Student |
+| `/admin-dashboard` | Admin Dashboard | Admin |
+| `/admin-settings` | Admin Settings | Admin |
+| `/admin-analytics` | Admin Analytics | Admin |
+| `*` | 404 Not Found | Public |
 
 ---
 
