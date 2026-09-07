@@ -45,6 +45,9 @@ const StudentLogin = () => {
       const response = await api.requestStudentOtp({ phone: normalizePhone(phone) });
       setMessage(response.message || 'OTP sent. Please check your phone.');
       setOtpRequested(true);
+      if (response.warning) {
+        setError(response.warning);
+      }
       if (import.meta.env.DEV && response.otp) {
         setOtpPreview(`Dev OTP: ${response.otp}`);
       }

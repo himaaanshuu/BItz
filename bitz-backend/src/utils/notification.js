@@ -13,7 +13,7 @@ export const sendOtpSms = async ({ to, otp }) => {
 
   if (!client) {
     console.log(`[OTP SMS] ${to}: ${otp} (Twilio not configured; OTP logged only)`);
-    return { delivered: false, preview: 'Twilio not configured; OTP logged.' };
+    return { delivered: false, error: 'SMS service not configured.' };
   }
 
   try {
@@ -33,7 +33,9 @@ export const sendOtpSms = async ({ to, otp }) => {
     return { delivered: true };
   } catch (error) {
     console.error('[OTP SMS] Twilio error:', error.message);
-    console.log(`[OTP SMS] ${to}: ${otp} (fallback: logged)`);
-    return { delivered: false, preview: `Twilio error: ${error.message}` };
+    if (error.code === 21215) {
+      return { delivered: false, error: 'Phone number not verified. In Twilio trial mode, only verified numbers can receive SMS.' };
+    }
+    return { delivered: false, error: `SMS failed: ${error.message}` };
   }
 };
