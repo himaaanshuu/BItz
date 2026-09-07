@@ -21,6 +21,11 @@ Bitez connects campus canteens with students through a seamless digital ordering
 
 ## Features
 
+### Landing Pages
+- **Role Selector** - Choose Student or Admin on the home page
+- **Student Landing** - Food ordering focus with BiteNinja game promo
+- **Admin Landing** - Canteen management focus with Tips of the Day
+
 ### Core
 - **Student Auth** - Phone OTP login + Google OAuth
 - **Admin Auth** - Email + password + mandatory OTP (two-factor)
@@ -28,6 +33,20 @@ Bitez connects campus canteens with students through a seamless digital ordering
 - **Live Order Tracking** - Students see preparation status in real-time
 - **Menu Management** - Canteen admins add, edit, toggle availability with image URLs
 - **Session Expiry** - 3-day sessions with 3-hour warning popup
+
+### BiteNinja Game
+- Canvas-based fruit ninja clone with food emojis
+- 12 food items + bombs, 30-second rounds
+- Combo system (up to 5x multiplier)
+- High score saved to localStorage
+- Touch support for mobile
+- Accessible from Student Landing page
+
+### Tips of the Day (Admin)
+- 12 business tips across 7 categories
+- Auto-rotating carousel with manual navigation
+- Categories: Operations, Strategy, Pricing, Finance, Quality, Marketing, Waste Reduction
+- Tips include: Peak Hour Prep, Menu Engineering, Combo Deals, Fresh Stock, Social Proof, Speed, Seasonal Specials, Cost Tracking, Feedback, Batch Cooking, Upselling, Data-Driven Menu
 
 ### Security
 - JWT algorithm enforcement (HS256 only)
@@ -55,7 +74,10 @@ Bitez connects campus canteens with students through a seamless digital ordering
 - Country code dropdown for phone input (30+ countries)
 - Responsive design (desktop, tablet, mobile)
 - Scroll animations (Framer Motion)
-- Favicon and Bitez logo
+- Floating food emoji backgrounds
+- Animated gradient text effects
+- Hover wipe effects on buttons
+- Feature cards with gradient overlays
 
 ---
 
@@ -78,8 +100,8 @@ Bitez connects campus canteens with students through a seamless digital ordering
 Bitez/
   bitz-frontend/              # Vite + React SPA
     src/
-      components/             # Navbar, Footer, PhoneInput, ScrollReveal, SessionExpiryAlert, CookieConsent, ClearAllSection
-      pages/                  # Home, About, Auth, Dashboard, Profile, Orders, Privacy, Terms, NotFound
+      components/             # Navbar, Footer, PhoneInput, ScrollReveal, SessionExpiryAlert, CookieConsent, ClearAllSection, BiteNinja, TipsOfTheDay
+      pages/                  # Home, StudentLanding, AdminLanding, About, Auth, Dashboard, Profile, Orders, Privacy, Terms, NotFound
       services/               # API client (api.js)
     public/                   # Static assets (logo, favicon, og-image, sitemap, robots.txt)
     vercel.json               # SPA rewrite rules + security headers + HTTPS redirect
@@ -222,7 +244,9 @@ Students log in with **phone number + OTP** (sent via SMS).
 
 | Route | Page | Access |
 |-------|------|--------|
-| `/` | Home | Public |
+| `/` | Home (Role Selector) | Public |
+| `/student-landing` | Student Landing | Public |
+| `/admin-landing` | Admin Landing | Public |
 | `/about` | About | Public |
 | `/privacy` | Privacy Policy | Public |
 | `/terms` | Terms & Conditions | Public |
