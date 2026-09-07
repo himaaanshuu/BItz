@@ -13,6 +13,8 @@ import CookieConsent from './components/CookieConsent';
 
 // Pages
 import Home from './pages/Home';
+import StudentLanding from './pages/StudentLanding';
+import AdminLanding from './pages/AdminLanding';
 import AuthPortal from './pages/AuthPortal';
 import StudentLogin from './pages/StudentLogin';
 import AdminLogin from './pages/AdminLogin';
@@ -81,6 +83,8 @@ function AnimatedRoutes() {
         <Routes location={location}>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
+          <Route path="/student-landing" element={<StudentLanding />} />
+          <Route path="/admin-landing" element={<AdminLanding />} />
           <Route path="/about" element={<About />} />
           <Route path="/auth" element={<AuthPortal />} />
           <Route path="/privacy" element={<Privacy />} />
