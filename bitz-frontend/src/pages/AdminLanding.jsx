@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import ScrollReveal from '../components/ScrollReveal';
+import TipsOfTheDay from '../components/TipsOfTheDay';
 import { BarChart3, Package, UtensilsCrossed, Clock, ChevronRight, ShieldCheck, ArrowLeft, Settings, Users, DollarSign, Sparkles, TrendingUp, Zap, Bell } from 'lucide-react';
 
 const AdminLanding = () => {
@@ -313,6 +314,9 @@ const AdminLanding = () => {
           </div>
         </ScrollReveal>
       </div>
+
+      {/* Tips of the Day */}
+      <TipsOfTheDay />
 
       {/* CTA */}
       <div className="max-w-7xl mx-auto px-6 my-32">
