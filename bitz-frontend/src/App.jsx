@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 import PageTransition from './components/PageTransition';
 import SessionExpiryAlert from './components/SessionExpiryAlert';
+import CookieConsent from './components/CookieConsent';
 
 // Pages
 import Home from './pages/Home';
@@ -21,7 +22,9 @@ import AdminSettings from './pages/AdminSettings';
 import AdminAnalytics from './pages/AdminAnalytics';
 import About from './pages/About';
 import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 import OrderPage from './pages/OrderPage';
+import NotFound from './pages/NotFound';
 
 // Student Pages
 import Profile from './pages/Profile';
@@ -29,7 +32,6 @@ import OrderHistory from './pages/OrderHistory';
 import CurrentOrder from './pages/CurrentOrder';
 import TrackOrder from './pages/TrackOrder';
 
-// 🔒 Student Protected Route - Also checks admin not logged in
 const ProtectedStudentRoute = ({ children }) => {
   const authToken = localStorage.getItem('bitezAuthToken');
   const hasStudentCookie = document.cookie
@@ -50,7 +52,6 @@ const ProtectedStudentRoute = ({ children }) => {
   return children;
 };
 
-// 🔒 Admin Protected Route - Also checks student not logged in
 const ProtectedAdminRoute = ({ children }) => {
   const authToken = localStorage.getItem('bitezAuthToken');
   const hasStudentCookie = document.cookie
@@ -83,6 +84,8 @@ function AnimatedRoutes() {
           <Route path="/about" element={<About />} />
           <Route path="/auth" element={<AuthPortal />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/404" element={<NotFound />} />
 
           {/* Student Routes */}
           <Route path="/student-login" element={<StudentLogin />} />
@@ -171,8 +174,8 @@ function AnimatedRoutes() {
             }
           />
 
-          {/* Fallback Route */}
-          <Route path="*" element={<Navigate to="/" />} />
+          {/* 404 Catch-all */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </PageTransition>
     </AnimatePresence>
@@ -185,6 +188,7 @@ function App() {
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || 'dummy-client-id.apps.googleusercontent.com'}>
         <Router>
           <SessionExpiryAlert />
+          <CookieConsent />
           <div className="min-h-screen">
             <AnimatedRoutes />
             <Footer />

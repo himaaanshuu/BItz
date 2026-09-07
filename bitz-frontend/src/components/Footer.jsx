@@ -5,17 +5,17 @@ import ScrollReveal from './ScrollReveal';
 
 const Footer = () => {
   return (
-    <footer className="bg-black text-white border-t-4 border-red-600">
+    <footer className="bg-black text-white border-t-4 border-orange-500">
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid md:grid-cols-4 gap-8">
           {/* Brand */}
           <ScrollReveal variant="fadeUp" delay={0.1}>
             <div>
-              <h3 className="text-2xl font-black mb-4 bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+              <h3 className="text-2xl font-black mb-4 bg-gradient-to-r from-orange-500 to-rose-500 bg-clip-text text-transparent">
                 BITEZ.
               </h3>
               <p className="text-gray-400">
-                Making eating wholesome, not a task.
+                Making eating wholesome, not a task. Campus food ordering made simple.
               </p>
             </div>
           </ScrollReveal>
@@ -52,13 +52,8 @@ const Footer = () => {
                   </Link>
                 </motion.div>
                 <motion.div whileHover={{ x: 4 }}>
-                  <Link to="/privacy" className="block text-gray-400 hover:text-orange-400 transition">
-                    Terms of Service
-                  </Link>
-                </motion.div>
-                <motion.div whileHover={{ x: 4 }}>
-                  <Link to="/privacy" className="block text-gray-400 hover:text-orange-400 transition">
-                    Refund Policy
+                  <Link to="/terms" className="block text-gray-400 hover:text-orange-400 transition">
+                    Terms & Conditions
                   </Link>
                 </motion.div>
               </div>
@@ -71,6 +66,7 @@ const Footer = () => {
               <h4 className="font-bold text-lg mb-4 text-orange-500">Contact</h4>
               <div className="space-y-2 text-gray-400">
                 <p>himanshu2005gupta@gmail.com</p>
+                <p className="text-sm">Campus Food Court</p>
               </div>
             </div>
           </ScrollReveal>
@@ -78,7 +74,7 @@ const Footer = () => {
 
         <ScrollReveal variant="fadeIn" delay={0.5}>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>© 2026 Bitez. Made with care for students</p>
+            <p>&copy; {new Date().getFullYear()} Bitez. Made with care for students.</p>
           </div>
         </ScrollReveal>
       </div>

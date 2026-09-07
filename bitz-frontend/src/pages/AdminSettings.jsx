@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Save, Eye, EyeOff, Building2, MapPin, Phone, Mail, Clock,
-  Lock, CheckCircle, AlertCircle, ArrowLeft, Shield, Store
+  Lock, CheckCircle, AlertCircle, ArrowLeft, Shield, Store, Trash2
 } from 'lucide-react';
 import { api } from '../services/api';
 import ScrollReveal from '../components/ScrollReveal';
+import ClearAllSection from '../components/ClearAllSection';
 
 const AdminSettings = () => {
   const navigate = useNavigate();
@@ -80,6 +81,7 @@ const AdminSettings = () => {
   const sections = [
     { id: 'profile', label: 'Canteen Profile', icon: Store },
     { id: 'password', label: 'Security', icon: Shield },
+    { id: 'danger', label: 'Danger Zone', icon: Trash2 },
   ];
 
   const canteenFields = [
@@ -274,6 +276,14 @@ const AdminSettings = () => {
                     </div>
                   </ScrollReveal>
                 </div>
+              </ScrollReveal>
+            </motion.div>
+          )}
+
+          {activeSection === 'danger' && (
+            <motion.div key="danger" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+              <ScrollReveal variant="fadeUp" delay={0.1}>
+                <ClearAllSection />
               </ScrollReveal>
             </motion.div>
           )}

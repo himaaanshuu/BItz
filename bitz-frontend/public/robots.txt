@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /admin-dashboard
+Disallow: /admin-settings
+Disallow: /admin-analytics
+Disallow: /order
+Disallow: /profile
+Disallow: /order-history
+Disallow: /current-order
+Disallow: /track
+Disallow: /api/
+
+Sitemap: https://bitez-theta.vercel.app/sitemap.xml
