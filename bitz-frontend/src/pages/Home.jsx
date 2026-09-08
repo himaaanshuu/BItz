@@ -160,23 +160,23 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Stats Section */}
+      {/* Engagement Section */}
       <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
         <ScrollReveal variant="fadeUp" delay={0.2}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { value: '2,000+', label: 'Students' },
-              { value: '15+', label: 'Menu Items' },
-              { value: '1', label: 'Canteen' },
-              { value: '4.8', label: 'Rating' },
+              { value: 'Freshly Made', label: 'Coming for your love' },
+              { value: 'Zero Wait', label: 'Waiting for your order' },
+              { value: 'Just For You', label: 'Curated with care' },
+              { value: 'Always Ready', label: 'Waiting for your visit' },
             ].map((stat, i) => (
               <motion.div
                 key={i}
                 whileHover={{ y: -4 }}
                 className="text-center p-6 glass rounded-2xl border border-white/60"
               >
-                <p className="text-3xl font-black text-orange-600">{stat.value}</p>
-                <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mt-2">{stat.label}</p>
+                <p className="text-xl font-black text-orange-600">{stat.value}</p>
+                <p className="text-sm font-bold text-slate-400 mt-2">{stat.label}</p>
               </motion.div>
             ))}
           </div>
