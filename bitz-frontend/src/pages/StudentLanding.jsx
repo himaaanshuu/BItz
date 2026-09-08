@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import ScrollReveal from '../components/ScrollReveal';
 import BiteNinja from '../components/BiteNinja';
-import { Zap, MapPin, CreditCard, ChevronRight, ArrowLeft, Utensils, Clock, Smartphone, Gamepad2, Sparkles, Star, Flame, Timer, Trophy } from 'lucide-react';
+import { Zap, MapPin, CreditCard, ChevronRight, ArrowLeft, Utensils, Clock, Smartphone, Gamepad2, Sparkles, Star, Heart, Timer, Trophy } from 'lucide-react';
 
 const floatingEmojis = ['🍕', '🍔', '🌮', '🍣', '🍜', '🍩', '🍦', '🧁', '🍰', '🧋'];
 
@@ -197,15 +197,15 @@ const StudentLanding = () => {
         </div>
       </motion.div>
 
-      {/* Stats with animated counters */}
+      {/* Engagement Section */}
       <div className="max-w-5xl mx-auto px-6 py-16 relative z-10">
         <ScrollReveal variant="fadeUp" delay={0.2}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { value: '2,000+', label: 'Students', icon: <Star size={20} /> },
-              { value: '15+', label: 'Menu Items', icon: <Utensils size={20} /> },
-              { value: '1', label: 'Canteen', icon: <Flame size={20} /> },
-              { value: '4.8', label: 'Rating', icon: <Trophy size={20} /> },
+              { value: 'Freshly Made', label: 'Coming for your love', icon: <Heart size={20} /> },
+              { value: 'Zero Wait', label: 'Waiting for your order', icon: <Clock size={20} /> },
+              { value: 'Just For You', label: 'Curated with care', icon: <Sparkles size={20} /> },
+              { value: 'Always Ready', label: 'Waiting for your visit', icon: <Star size={20} /> },
             ].map((stat, i) => (
               <motion.div
                 key={i}
