@@ -51,7 +51,7 @@ const Home = () => {
 
           <ScrollReveal variant="fadeUp" delay={0.4}>
             <p className="text-xl text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
-              Choose how you want to use Bitez. Order food as a student or manage your canteen as an admin.
+              Are you here to enjoy delicious food, or to make others enjoy it?
             </p>
           </ScrollReveal>
         </div>
